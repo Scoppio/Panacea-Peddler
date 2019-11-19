@@ -14,6 +14,7 @@ static unsigned char counter = 60;
 static const unsigned char SIXTY = 60;
 static const unsigned char text[] = "Clock:"; // zero terminated c string
 static unsigned char datetime[] = "00:00:00";
+static unsigned char debug_text[10] = "          ";
 
 typedef unsigned char BYTE;
 
@@ -41,7 +42,7 @@ struct SpObject
 
 struct Card
 {
-    signed char value;
+    unsigned char value;
     unsigned char color;
     unsigned char Lmodifier;
     unsigned char Rmodifier;
@@ -49,7 +50,7 @@ struct Card
 
 struct Cursor
 {
-    unsigned int *cardId;
+    struct Card *cardId;
     unsigned char cell;
 } cursor;
 
@@ -87,9 +88,9 @@ struct Card red_cards[] = {
     {1, RED_CARD, M_NONE, M_RANDOM},
     {1, RED_CARD, M_RANDOM, M_RANDOM},
     {1, RED_CARD, M_RANDOM, M_RANDOM},
-    {-2, BLACK_CARD, M_RANDOM, M_NONE},
-    {-3, BLACK_CARD, M_NONE, M_RANDOM},
-    {-1, BLACK_CARD, M_RANDOM, M_RANDOM}};
+    {2, BLACK_CARD, M_RANDOM, M_NONE},    // 10
+    {3, BLACK_CARD, M_NONE, M_RANDOM},    // 11
+    {1, BLACK_CARD, M_RANDOM, M_RANDOM}}; // 12
 
 struct Card yellow_cards[] = {
     {1, YELLOW_CARD, M_NONE, M_NONE},
@@ -102,9 +103,9 @@ struct Card yellow_cards[] = {
     {1, YELLOW_CARD, M_NONE, M_RANDOM},
     {1, YELLOW_CARD, M_RANDOM, M_RANDOM},
     {1, YELLOW_CARD, M_RANDOM, M_RANDOM},
-    {-2, BLACK_CARD, M_RANDOM, M_NONE},
-    {-3, BLACK_CARD, M_NONE, M_RANDOM},
-    {-1, BLACK_CARD, M_RANDOM, M_RANDOM}};
+    {2, BLACK_CARD, M_RANDOM, M_NONE},
+    {3, BLACK_CARD, M_NONE, M_RANDOM},
+    {1, BLACK_CARD, M_RANDOM, M_RANDOM}};
 
 struct Card green_cards[] = {
     {1, GREEN_CARD, M_NONE, M_NONE},
@@ -117,9 +118,9 @@ struct Card green_cards[] = {
     {1, GREEN_CARD, M_NONE, M_RANDOM},
     {1, GREEN_CARD, M_RANDOM, M_RANDOM},
     {1, GREEN_CARD, M_RANDOM, M_RANDOM},
-    {-2, BLACK_CARD, M_RANDOM, M_NONE},
-    {-3, BLACK_CARD, M_NONE, M_RANDOM},
-    {-1, BLACK_CARD, M_RANDOM, M_RANDOM}};
+    {2, BLACK_CARD, M_RANDOM, M_NONE},
+    {3, BLACK_CARD, M_NONE, M_RANDOM},
+    {1, BLACK_CARD, M_RANDOM, M_RANDOM}};
 
 struct Card blue_cards[] = {
     {1, BLUE_CARD, M_NONE, M_NONE},
@@ -132,9 +133,9 @@ struct Card blue_cards[] = {
     {1, BLUE_CARD, M_NONE, M_RANDOM},
     {1, BLUE_CARD, M_RANDOM, M_RANDOM},
     {1, BLUE_CARD, M_RANDOM, M_RANDOM},
-    {-2, BLACK_CARD, M_RANDOM, M_NONE},
-    {-3, BLACK_CARD, M_NONE, M_RANDOM},
-    {-1, BLACK_CARD, M_RANDOM, M_RANDOM}};
+    {2, BLACK_CARD, M_RANDOM, M_NONE},
+    {3, BLACK_CARD, M_NONE, M_RANDOM},
+    {1, BLACK_CARD, M_RANDOM, M_RANDOM}};
 
 const unsigned char palette_bg[] = {
     BLACK, DARK_GREY, SILVER, WHITE,
@@ -160,6 +161,7 @@ void _update60(void);
 void game_loop(void);
 void draw_sprites(void);
 void timer_draw(void);
+void print_debug(void);
 void draw_bg(void);
 void controller_update(void);
 void shuffle_decks(void);

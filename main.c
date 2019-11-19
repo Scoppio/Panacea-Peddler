@@ -156,8 +156,8 @@ void controller_update(void)
 void _draw(void)
 {
 	ppu_wait_nmi();
-	timer_draw();
-
+	// timer_draw();
+	print_debug();
 	//draw_card_piles();
 	//draw_cards_table();
 }
@@ -179,6 +179,34 @@ void timer_draw(void)
 	datetime[1] = ones + '0';
 	datetime[0] = tens + '0';
 	PRINT_AT(10, 3, datetime);
+}
+
+void print_debug(void)
+{
+	i = red_size_pt;
+	_count_one_and_tens();
+	debug_text[7] = ones + '0';
+	debug_text[6] = tens + '0';
+
+	i = red_idx[red_size_pt];
+	_count_one_and_tens();
+	debug_text[4] = ones + '0';
+	debug_text[3] = tens + '0';
+
+	i = red_cards[red_idx[red_size_pt]].value;
+
+	if (red_cards[red_idx[red_size_pt]].color == BLACK_CARD)
+	{
+		debug_text[0] = '-';
+	}
+	else
+	{
+		debug_text[0] = ' ';
+	}
+	_count_one_and_tens();
+	debug_text[1] = ones + '0';
+
+	PRINT_AT(10, 3, debug_text);
 }
 
 void draw_sprites(void)
