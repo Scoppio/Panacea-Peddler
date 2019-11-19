@@ -23,7 +23,7 @@
 // all variables should be global for speed
 // zeropage global is even faster
 
-unsigned char GameState = MENU;
+unsigned char GameState = GAME;
 
 #define SCREEN_POS(x, y) (vram_adr(NTADR_A(x, y)))
 #define PRINT(t) (vram_write(t, sizeof(t)))
@@ -32,27 +32,134 @@ unsigned char GameState = MENU;
 	PRINT(t);             \
 	SCREEN_POS(0, 0);
 
+#define BTN(btn) (pad1_new & btn)
+
 void _init(void)
 {
 	ppu_off();			 // screen off
 	pal_bg(palette_bg);  //	load the BG palette
 	pal_spr(palette_sp); // load the Sprite palette
 	ppu_on_all();		 //	turn on screen
-
 	bank_spr(1);
 	draw_bg();
+	shuffle_decks();
 }
 
 void _update60(void)
 {
 	// do nothing atm;
+	controller_update();
+}
+
+void shuffle_decks(void)
+{
+
+	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
+	{
+		do
+		{
+			j = rand8() & 0xF + i;
+		} while (j >= DECK_CARDS_SIZE);
+		t = red_idx[j];
+		red_idx[j] = red_idx[i];
+		red_idx[i] = t;
+	}
+
+	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
+	{
+		do
+		{
+			j = rand8() & 0xF + i;
+		} while (j >= DECK_CARDS_SIZE);
+		t = yellow_idx[j];
+		yellow_idx[j] = yellow_idx[i];
+		yellow_idx[i] = t;
+	}
+
+	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
+	{
+		do
+		{
+			j = rand8() & 0xF + i;
+		} while (j >= DECK_CARDS_SIZE);
+		t = green_idx[j];
+		green_idx[j] = green_idx[i];
+		green_idx[i] = t;
+	}
+
+	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
+	{
+		do
+		{
+			j = rand8() & 0xF + i;
+		} while (j >= DECK_CARDS_SIZE);
+		t = blue_idx[j];
+		blue_idx[j] = blue_idx[i];
+		blue_idx[i] = t;
+	}
+}
+
+void controller_update(void)
+{
+	pad_poll(0);			   // read the first controller
+	pad1_new = get_pad_new(0); // newly pressed button. do pad_poll first
+
+	if (GameState == GAME)
+	{
+		// to implement
+		if (BTN(PAD_A))
+		{
+			// if the cell is under 4 it will place on the table
+			// therefore it will place the card on the table at the cell it is targeting.
+			// switch (cursor.cell)
+			// {
+			// case 0:
+			// 	cursor.cardId = &blue_cards[0];
+			// 	break;
+			// case 1:
+			// 	cursor.cardId = &yellow_cards[0];
+			// 	break;
+			// case 2:
+			// 	cursor.cardId = &red_cards[0];
+			// 	break;
+			// case 3:
+			// 	cursor.cardId = &green_cards[0];
+			// 	break;
+			// }
+			// if (!(cursor.cell & 0x4))
+			// {
+			// 	cursor.cell &= 0x4;
+			// }
+		}
+		if (BTN(PAD_B))
+		{
+			if (red_size_pt < DECK_CARDS_SIZE - 1)
+			{
+				red_size_pt++;
+			}
+		}
+		if (BTN(PAD_LEFT))
+		{
+			cursor.cell = cursor.cell == 0 ? 3 : cursor.cell - 1;
+		}
+		if (BTN(PAD_RIGHT))
+		{
+			cursor.cell = cursor.cell == 3 ? 0 : cursor.cell + 1;
+		}
+	}
+	else if (GameState == MENU)
+	{
+		// not implemented yet
+	}
 }
 
 void _draw(void)
 {
 	ppu_wait_nmi();
-	// clear_vram_buffer();
 	timer_draw();
+
+	//draw_card_piles();
+	//draw_cards_table();
 }
 
 void timer_draw(void)
@@ -62,10 +169,12 @@ void timer_draw(void)
 	datetime[7] = ones + '0';
 	datetime[6] = tens + '0';
 	i = minute;
+	i = red_size_pt;
 	_count_one_and_tens();
 	datetime[4] = ones + '0';
 	datetime[3] = tens + '0';
 	i = hour;
+	i = red_idx[red_size_pt];
 	_count_one_and_tens();
 	datetime[1] = ones + '0';
 	datetime[0] = tens + '0';
