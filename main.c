@@ -33,6 +33,11 @@ unsigned char GameState = GAME;
 	SCREEN_POS(0, 0);
 
 #define BTN(btn) (pad1_new & btn)
+#define HEX_TO_CHAR(byt) (((byt & 0x0F) > 0x9) ? (byt & 0x0F) + SEVEN_CHAR : (byt & 0x0F) + ZERO_CHAR)
+#define BLUE_IDX() (blue_idx[blue_size_pt])
+#define GREEN_IDX() (green_idx[green_size_pt])
+#define YELLOW_IDX() (yellow_idx[yellow_size_pt])
+#define RED_IDX() (red_idx[red_size_pt])
 
 void _init(void)
 {
@@ -42,7 +47,6 @@ void _init(void)
 	ppu_on_all();		 //	turn on screen
 	bank_spr(1);
 	draw_bg();
-	shuffle_decks();
 }
 
 void _update60(void)
@@ -53,49 +57,23 @@ void _update60(void)
 
 void shuffle_decks(void)
 {
+	shuffle(&red_idx);
+	shuffle(&blue_idx);
+	shuffle(&green_idx);
+	shuffle(&yellow_idx);
+}
 
+void shuffle(unsigned char (*array)[13])
+{
 	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
 	{
 		do
 		{
-			j = rand8() & 0xF + i;
+			j = i + rand8() & 0x0F;
 		} while (j >= DECK_CARDS_SIZE);
-		t = red_idx[j];
-		red_idx[j] = red_idx[i];
-		red_idx[i] = t;
-	}
-
-	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
-	{
-		do
-		{
-			j = rand8() & 0xF + i;
-		} while (j >= DECK_CARDS_SIZE);
-		t = yellow_idx[j];
-		yellow_idx[j] = yellow_idx[i];
-		yellow_idx[i] = t;
-	}
-
-	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
-	{
-		do
-		{
-			j = rand8() & 0xF + i;
-		} while (j >= DECK_CARDS_SIZE);
-		t = green_idx[j];
-		green_idx[j] = green_idx[i];
-		green_idx[i] = t;
-	}
-
-	for (i = 0; i < DECK_CARDS_SIZE - 1; i++)
-	{
-		do
-		{
-			j = rand8() & 0xF + i;
-		} while (j >= DECK_CARDS_SIZE);
-		t = blue_idx[j];
-		blue_idx[j] = blue_idx[i];
-		blue_idx[i] = t;
+		t = (*array)[j];
+		(*array)[j] = (*array)[i];
+		(*array)[i] = t;
 	}
 }
 
@@ -111,31 +89,61 @@ void controller_update(void)
 		{
 			// if the cell is under 4 it will place on the table
 			// therefore it will place the card on the table at the cell it is targeting.
-			// switch (cursor.cell)
-			// {
-			// case 0:
-			// 	cursor.cardId = &blue_cards[0];
-			// 	break;
-			// case 1:
-			// 	cursor.cardId = &yellow_cards[0];
-			// 	break;
-			// case 2:
-			// 	cursor.cardId = &red_cards[0];
-			// 	break;
-			// case 3:
-			// 	cursor.cardId = &green_cards[0];
-			// 	break;
-			// }
-			// if (!(cursor.cell & 0x4))
-			// {
-			// 	cursor.cell &= 0x4;
-			// }
+			switch (cursor.cell)
+			{
+			case 0:
+				if (blue_size_pt < DECK_CARDS_SIZE - 1)
+				{
+					cursor.card = &blue_cards[BLUE_IDX()];
+					blue_size_pt--;
+				}
+				break;
+			case 1:
+				if (yellow_size_pt < DECK_CARDS_SIZE - 1)
+				{
+					cursor.card = &yellow_cards[YELLOW_IDX()];
+				}
+				break;
+			case 2:
+				if (red_size_pt < DECK_CARDS_SIZE - 1)
+				{
+					cursor.card = &red_cards[RED_IDX()];
+				}
+				break;
+			case 3:
+				if (green_size_pt < DECK_CARDS_SIZE - 1)
+				{
+					cursor.card = &green_cards[GREEN_IDX()];
+				}
+				break;
+			}
+			if (!(cursor.cell & 0x4))
+			{
+				cursor.cell &= 0x4;
+			}
 		}
 		if (BTN(PAD_B))
 		{
-			if (red_size_pt < DECK_CARDS_SIZE - 1)
+			if ((cursor.card->id >> 4) == 0x1)
 			{
-				red_size_pt++;
+				// red
+				cursor.card = NULL;
+				red_size_pt--;
+			}
+			else if ((cursor.card->id >> 4) == 0x2)
+			{
+				cursor.card = NULL;
+				red_size_pt--;
+			}
+			else if ((cursor.card->id >> 4) == 0x3)
+			{
+				cursor.card = NULL;
+				red_size_pt--;
+			}
+			else if ((cursor.card->id >> 4) == 0x4)
+			{
+				cursor.card = NULL;
+				red_size_pt--;
 			}
 		}
 		if (BTN(PAD_LEFT))
@@ -165,46 +173,36 @@ void _draw(void)
 void timer_draw(void)
 {
 	i = second;
-	_count_one_and_tens();
-	datetime[7] = ones + '0';
-	datetime[6] = tens + '0';
+	convert_i_to_decimal();
+	datetime[7] = ones;
+	datetime[6] = tens;
 	i = minute;
-	i = red_size_pt;
-	_count_one_and_tens();
-	datetime[4] = ones + '0';
-	datetime[3] = tens + '0';
+	convert_i_to_decimal();
+	datetime[4] = ones;
+	datetime[3] = tens;
 	i = hour;
-	i = red_idx[red_size_pt];
-	_count_one_and_tens();
-	datetime[1] = ones + '0';
-	datetime[0] = tens + '0';
+	convert_i_to_decimal();
+	datetime[1] = ones;
+	datetime[0] = tens;
 	PRINT_AT(10, 3, datetime);
 }
 
 void print_debug(void)
 {
+	cursor.card = &red_cards[red_idx[red_size_pt]];
 	i = red_size_pt;
-	_count_one_and_tens();
-	debug_text[7] = ones + '0';
-	debug_text[6] = tens + '0';
+	convert_i_to_decimal();
+	debug_text[7] = ones;
+	debug_text[6] = tens;
 
 	i = red_idx[red_size_pt];
-	_count_one_and_tens();
-	debug_text[4] = ones + '0';
-	debug_text[3] = tens + '0';
+	convert_i_to_decimal();
+	debug_text[4] = ones;
+	debug_text[3] = tens;
 
-	i = red_cards[red_idx[red_size_pt]].value;
-
-	if (red_cards[red_idx[red_size_pt]].color == BLACK_CARD)
-	{
-		debug_text[0] = '-';
-	}
-	else
-	{
-		debug_text[0] = ' ';
-	}
-	_count_one_and_tens();
-	debug_text[1] = ones + '0';
+	i = cursor.card->id;
+	debug_text[1] = HEX_TO_CHAR(i);
+	debug_text[0] = HEX_TO_CHAR(i >> 4);
 
 	PRINT_AT(10, 3, debug_text);
 }
