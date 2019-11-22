@@ -58,6 +58,8 @@ struct Cursor
 // struct SpObject Paddle = {0x75, PADDLE_Y, 0x1f, 7};
 // struct SpObject Ball = {0xff, 0xff, 5, 5}; // balls x and x will be init later
 
+struct Card *table[4];
+
 const static unsigned char red_size = 13;
 const static unsigned char yellow_size = 13;
 const static unsigned char green_size = 13;
@@ -80,21 +82,43 @@ static unsigned char blue_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
 static const unsigned char ZERO_CHAR = '0';
 static const unsigned char SEVEN_CHAR = '7';
+/*
 
-struct Card red_cards[] = {
-    {0x10, 1, RED_CARD, M_NONE, M_NONE},
-    {0x11, 1, RED_CARD, M_NONE, M_NONE},
-    {0x12, 1, RED_CARD, M_NONE, M_NONE},
-    {0x13, 1, RED_CARD, M_RANDOM, M_NONE},
-    {0x14, 1, RED_CARD, M_RANDOM, M_NONE},
-    {0x15, 1, RED_CARD, M_NONE, M_RANDOM},
-    {0x16, 1, RED_CARD, M_NONE, M_RANDOM},
-    {0x17, 1, RED_CARD, M_NONE, M_RANDOM},
-    {0x18, 1, RED_CARD, M_RANDOM, M_RANDOM},
-    {0x19, 1, RED_CARD, M_RANDOM, M_RANDOM},
-    {0x1A, 2, BLACK_CARD, M_RANDOM, M_NONE},    // 10
-    {0x1B, 3, BLACK_CARD, M_NONE, M_RANDOM},    // 11
-    {0x1C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}}; // 12
+ *  0 = blue
+ *  1 = green
+ *  2 = yellow
+ *  3 = red
+ * */
+
+struct Card blue_cards[] = {
+    {0x00, 1, BLUE_CARD, M_NONE, M_NONE},
+    {0x01, 1, BLUE_CARD, M_NONE, M_NONE},
+    {0x02, 1, BLUE_CARD, M_NONE, M_NONE},
+    {0x03, 1, BLUE_CARD, M_RANDOM, M_NONE},
+    {0x04, 1, BLUE_CARD, M_RANDOM, M_NONE},
+    {0x05, 1, BLUE_CARD, M_NONE, M_RANDOM},
+    {0x06, 1, BLUE_CARD, M_NONE, M_RANDOM},
+    {0x07, 1, BLUE_CARD, M_NONE, M_RANDOM},
+    {0x08, 1, BLUE_CARD, M_RANDOM, M_RANDOM},
+    {0x09, 1, BLUE_CARD, M_RANDOM, M_RANDOM},
+    {0x0A, 2, BLACK_CARD, M_RANDOM, M_NONE},
+    {0x0B, 3, BLACK_CARD, M_NONE, M_RANDOM},
+    {0x0C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}};
+
+struct Card green_cards[] = {
+    {0x10, 1, GREEN_CARD, M_NONE, M_NONE},
+    {0x11, 1, GREEN_CARD, M_NONE, M_NONE},
+    {0x12, 1, GREEN_CARD, M_NONE, M_NONE},
+    {0x13, 1, GREEN_CARD, M_RANDOM, M_NONE},
+    {0x14, 1, GREEN_CARD, M_RANDOM, M_NONE},
+    {0x15, 1, GREEN_CARD, M_NONE, M_RANDOM},
+    {0x16, 1, GREEN_CARD, M_NONE, M_RANDOM},
+    {0x17, 1, GREEN_CARD, M_NONE, M_RANDOM},
+    {0x18, 1, GREEN_CARD, M_RANDOM, M_RANDOM},
+    {0x19, 1, GREEN_CARD, M_RANDOM, M_RANDOM},
+    {0x1A, 2, BLACK_CARD, M_RANDOM, M_NONE},
+    {0x1B, 3, BLACK_CARD, M_NONE, M_RANDOM},
+    {0x1C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}};
 
 struct Card yellow_cards[] = {
     {0x20, 1, YELLOW_CARD, M_NONE, M_NONE},
@@ -111,35 +135,20 @@ struct Card yellow_cards[] = {
     {0x2B, 3, BLACK_CARD, M_NONE, M_RANDOM},
     {0x2C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}};
 
-struct Card green_cards[] = {
-    {0x30, 1, GREEN_CARD, M_NONE, M_NONE},
-    {0x31, 1, GREEN_CARD, M_NONE, M_NONE},
-    {0x32, 1, GREEN_CARD, M_NONE, M_NONE},
-    {0x33, 1, GREEN_CARD, M_RANDOM, M_NONE},
-    {0x34, 1, GREEN_CARD, M_RANDOM, M_NONE},
-    {0x35, 1, GREEN_CARD, M_NONE, M_RANDOM},
-    {0x36, 1, GREEN_CARD, M_NONE, M_RANDOM},
-    {0x37, 1, GREEN_CARD, M_NONE, M_RANDOM},
-    {0x38, 1, GREEN_CARD, M_RANDOM, M_RANDOM},
-    {0x39, 1, GREEN_CARD, M_RANDOM, M_RANDOM},
-    {0x3A, 2, BLACK_CARD, M_RANDOM, M_NONE},
-    {0x3B, 3, BLACK_CARD, M_NONE, M_RANDOM},
-    {0x3C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}};
-
-struct Card blue_cards[] = {
-    {0x40, 1, BLUE_CARD, M_NONE, M_NONE},
-    {0x41, 1, BLUE_CARD, M_NONE, M_NONE},
-    {0x42, 1, BLUE_CARD, M_NONE, M_NONE},
-    {0x43, 1, BLUE_CARD, M_RANDOM, M_NONE},
-    {0x44, 1, BLUE_CARD, M_RANDOM, M_NONE},
-    {0x45, 1, BLUE_CARD, M_NONE, M_RANDOM},
-    {0x46, 1, BLUE_CARD, M_NONE, M_RANDOM},
-    {0x47, 1, BLUE_CARD, M_NONE, M_RANDOM},
-    {0x48, 1, BLUE_CARD, M_RANDOM, M_RANDOM},
-    {0x49, 1, BLUE_CARD, M_RANDOM, M_RANDOM},
-    {0x4A, 2, BLACK_CARD, M_RANDOM, M_NONE},
-    {0x4B, 3, BLACK_CARD, M_NONE, M_RANDOM},
-    {0x4C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}};
+struct Card red_cards[] = {
+    {0x30, 1, RED_CARD, M_NONE, M_NONE},
+    {0x31, 1, RED_CARD, M_NONE, M_NONE},
+    {0x32, 1, RED_CARD, M_NONE, M_NONE},
+    {0x33, 1, RED_CARD, M_RANDOM, M_NONE},
+    {0x34, 1, RED_CARD, M_RANDOM, M_NONE},
+    {0x35, 1, RED_CARD, M_NONE, M_RANDOM},
+    {0x36, 1, RED_CARD, M_NONE, M_RANDOM},
+    {0x37, 1, RED_CARD, M_NONE, M_RANDOM},
+    {0x38, 1, RED_CARD, M_RANDOM, M_RANDOM},
+    {0x39, 1, RED_CARD, M_RANDOM, M_RANDOM},
+    {0x3A, 2, BLACK_CARD, M_RANDOM, M_NONE},    // 10
+    {0x3B, 3, BLACK_CARD, M_NONE, M_RANDOM},    // 11
+    {0x3C, 1, BLACK_CARD, M_RANDOM, M_RANDOM}}; // 12
 
 const unsigned char palette_bg[] = {
     BLACK, DARK_GREY, SILVER, WHITE,

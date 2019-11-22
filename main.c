@@ -77,6 +77,23 @@ void shuffle(unsigned char (*array)[13])
 	}
 }
 
+/**
+ *
+ *  Table
+ *  Cells
+ *  _________________
+ *  |   |   |   |   |
+ *  | 4 | 5 | 6 | 7 |
+ *  |___|___|___|___|
+ *  |   |   |   |   |
+ *  | 0 | 1 | 2 | 3 |
+ *  |___|___|___|___|
+ * 
+ *  0 = blue
+ *  1 = green
+ *  2 = yellow
+ *  3 = red
+ */
 void controller_update(void)
 {
 	pad_poll(0);			   // read the first controller
@@ -95,25 +112,72 @@ void controller_update(void)
 				if (blue_size_pt < DECK_CARDS_SIZE - 1)
 				{
 					cursor.card = &blue_cards[BLUE_IDX()];
-					blue_size_pt--;
+					blue_size_pt++;
 				}
 				break;
 			case 1:
-				if (yellow_size_pt < DECK_CARDS_SIZE - 1)
-				{
-					cursor.card = &yellow_cards[YELLOW_IDX()];
-				}
-				break;
-			case 2:
-				if (red_size_pt < DECK_CARDS_SIZE - 1)
-				{
-					cursor.card = &red_cards[RED_IDX()];
-				}
-				break;
-			case 3:
 				if (green_size_pt < DECK_CARDS_SIZE - 1)
 				{
 					cursor.card = &green_cards[GREEN_IDX()];
+					green_size_pt++;
+				}
+				break;
+			case 2:
+				if (yellow_size_pt < DECK_CARDS_SIZE - 1)
+				{
+					cursor.card = &yellow_cards[YELLOW_IDX()];
+					yellow_size_pt++;
+				}
+				break;
+			case 3:
+				if (red_size_pt < DECK_CARDS_SIZE - 1)
+				{
+					cursor.card = &red_cards[RED_IDX()];
+					red_size_pt++;
+				}
+				break;
+			case 4:
+				if (table[0] != NULL)
+				{
+					table[0] = cursor.card;
+					cursor.card = NULL;
+				}
+				else
+				{
+					// do nothing
+				}
+				break;
+			case 5:
+				if (table[1] != NULL)
+				{
+					table[1] = cursor.card;
+					cursor.card = NULL;
+				}
+				else
+				{
+					// do nothing
+				}
+				break;
+			case 6:
+				if (table[2] != NULL)
+				{
+					table[2] = cursor.card;
+					cursor.card = NULL;
+				}
+				else
+				{
+					// do nothing
+				}
+				break;
+			case 7:
+				if (table[3] != NULL)
+				{
+					table[3] = cursor.card;
+					cursor.card = NULL;
+				}
+				else
+				{
+					// do nothing
 				}
 				break;
 			}
@@ -124,26 +188,31 @@ void controller_update(void)
 		}
 		if (BTN(PAD_B))
 		{
-			if ((cursor.card->id >> 4) == 0x1)
+			/*
+			*  0 = blue
+			*  1 = green
+			*  2 = yellow
+			*  3 = red
+			* */
+			if (cursor.card != NULL)
 			{
-				// red
+				if ((cursor.card->id >> 4) == 0x0)
+				{
+					blue_size_pt--;
+				}
+				else if ((cursor.card->id >> 4) == 0x1)
+				{
+					green_size_pt--;
+				}
+				else if ((cursor.card->id >> 4) == 0x2)
+				{
+					yellow_size_pt--;
+				}
+				else if ((cursor.card->id >> 4) == 0x3)
+				{
+					red_size_pt--;
+				}
 				cursor.card = NULL;
-				red_size_pt--;
-			}
-			else if ((cursor.card->id >> 4) == 0x2)
-			{
-				cursor.card = NULL;
-				red_size_pt--;
-			}
-			else if ((cursor.card->id >> 4) == 0x3)
-			{
-				cursor.card = NULL;
-				red_size_pt--;
-			}
-			else if ((cursor.card->id >> 4) == 0x4)
-			{
-				cursor.card = NULL;
-				red_size_pt--;
 			}
 		}
 		if (BTN(PAD_LEFT))
