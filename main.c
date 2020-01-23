@@ -1,8 +1,7 @@
-/*	Panacea Pedler
- * 	@author scoppio
- *  @date 2019
+/*  Panacea Pedler
+ *  @author scoppio
+ *  @date 2019-2020
  */
-
 #include "lib/neslib.h"
 #include "lib/nesdoug.h"
 #include "lib/colornames.h"
