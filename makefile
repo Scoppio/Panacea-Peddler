@@ -16,7 +16,9 @@ LDFLAGS = -C nrom_32k_vert.cfg
 BUILD_FILES = nes.lib -Ln
 
 ODIR=output
-_LABELS = labels.txt
+_LABELS = game.labels.txt
+EXTRAS = -m $(patsubst %,$(ODIR)/%, game.map.txt) --dbgfile $(patsubst %,$(ODIR)/%, game.nes.dbg)
+
 DEPS = $(patsubst %,$(ODIR)/%,$(_DEPS))
 LABELS = $(patsubst %,$(ODIR)/%,$(_LABELS))
 
@@ -53,13 +55,13 @@ $(ODIR)/%.o: $(ODIR)/%.s
 
 # Create game
 game.nes: $(DEPS)
-	$(LD) $(LDFLAGS) -o $(ODIR)/$@ $^ $(BUILD_FILES) $(LABELS)
+	$(LD) $(LDFLAGS) -o $(ODIR)/$@ $^ $(BUILD_FILES) $(LABELS) $(EXTRAS)
 
 
 .PHONY: clean
 
 clean:
-	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.nes $(ODIR)/*.txt
+	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.nes $(ODIR)/*.txt $(ODIR)/*.dbg
 
 clean-misc:
-	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt
+	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt $(ODIR)/*.dbg
