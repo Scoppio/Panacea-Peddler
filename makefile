@@ -20,8 +20,25 @@ _LABELS = labels.txt
 DEPS = $(patsubst %,$(ODIR)/%,$(_DEPS))
 LABELS = $(patsubst %,$(ODIR)/%,$(_LABELS))
 
+ifeq (${OS},Windows_NT)
+		REMOVE = C:/cygwin64/bin/rm -f
+		MKDIR_P = mkdir
+else
+        REMOVE = rm -f
+		MKDIR_P = mkdir -p
+endif
+
+# process that creates the output folder if not present
+
+ifeq (,$(wildcard $(@D)))
+    	dir_guard=
+else
+		dir_guard=$(MKDIR_P) $(@D)	
+endif
+
 # Build process - c to asm files
 $(ODIR)/%.s: %.c
+	$(dir_guard)
 	$(CC) -o $@ -Oirs $^ $(CC65FLAGS)
 
 # Generated Asm file to object file
@@ -42,7 +59,7 @@ game.nes: $(DEPS)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.nes $(ODIR)/*.txt
+	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.nes $(ODIR)/*.txt
 
 clean-misc:
-	rm -f $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt
+	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt
