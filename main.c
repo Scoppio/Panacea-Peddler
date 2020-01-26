@@ -326,6 +326,7 @@ void controller_game(void)
 	}
 	if (BTN(PAD_START) && BTN(PAD_SELECT))
 	{
+		GameState = ENDSCREEN;
 		reset_game();
 	}
 }

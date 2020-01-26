@@ -1,31 +1,33 @@
-local M = {}
- 
-local function execute(ram_table)
-    
-    local function readCursor(idx)
-        return memory.readbyte(ram_table["_cursor"]+idx)
-    end
+local utils = require(".utils")
 
-    print("Deck Shuffling Test")
+local M = {}
+
+local function execute(ram_table)
+    local res = 0
+    print("Menu Test::checking game state")
     -- up down left right start select A B
     local gs = memory.readbyte(ram_table["_GameState"])
-    print("assert GameState == 2 ? ", gs == 2, " - ", gs)
-    
-    local cursor = {}
-    cursor.id = readCursor(0)
-    cursor.value = readCursor(1)
-    cursor.color = readCursor(2)
-    cursor.Lmodifier = readCursor(3)
-    cursor.Rmodifier = readCursor(4)
-    cursor.cell = readCursor(5)
-    
-    print(cursor)
-    -- has 6 chars, first 5 are a card, last one is the cell
+    local gamestates = {}
+    gamestates[0] = "MENU"
+    gamestates[1] = "MENU_SETTINGS"
+    gamestates[2] = "GAME"
+    gamestates[3] = "ENDSCREEN"
 
+    print("GameState ".. gamestates[gs])
 
-    local inputtable = {}
-    joypad.write(1, inputtable); 
-    return 
+    if (gamestates[gs] == gamestates[0]) then
+        res = res +1
+        local inputtable = {}
+        inputtable["select"] = true
+        joypad.write(1, inputtable)
+        utils.wait(1)
+        gs = memory.readbyte(ram_table["_GameState"])
+        if (gamestates[gs] == gamestates[1]) then
+            -- do nothing
+            res = res + 1
+        end
+    end
+    return res, 2
 end
 M.execute = execute
  

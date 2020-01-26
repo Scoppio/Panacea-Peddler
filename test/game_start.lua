@@ -1,32 +1,70 @@
+local utils = require(".utils")
+
 local M = {}
  
 local function execute(ram_table)
+    local inputtable = {}
     
-    local function readCursor(idx)
-        return memory.readbyte(ram_table["_cursor"]+idx)
-    end
+    local gamestates = {}
+    gamestates[0] = "MENU"
+    gamestates[1] = "MENU_SETTINGS"
+    gamestates[2] = "GAME"
+    gamestates[3] = "ENDSCREEN"
 
-    print("Deck Shuffling Test")
     -- up down left right start select A B
     local gs = memory.readbyte(ram_table["_GameState"])
-    print("assert GameState == 2 ? ", gs == 2, " - ", gs)
-    
-    local cursor = {}
-    cursor.id = readCursor(0)
-    cursor.value = readCursor(1)
-    cursor.color = readCursor(2)
-    cursor.Lmodifier = readCursor(3)
-    cursor.Rmodifier = readCursor(4)
-    cursor.cell = readCursor(5)
-    
-    print(cursor)
-    -- has 6 chars, first 5 are a card, last one is the cell
 
+    print("Game on state", gamestates[gs])
 
-    local inputtable = {}
-    joypad.write(1, inputtable); 
-    return 
+    -- if not on game mode, move to game mode
+    if (gamestates[gs] == gamestates[2]) 
+    then
+        return
+    else
+        inputtable["start"] = true
+        joypad.write(1, inputtable)
+        utils.wait(5, "Current mode = ".. gamestates[gs])
+        execute(ram_table)
+    end
 end
-M.execute = execute
- 
+
+local function goToMenu(ram_table)
+    local inputtable = {}
+    
+    local gamestates = {}
+    gamestates[0] = "MENU"
+    gamestates[1] = "MENU_SETTINGS"
+    gamestates[2] = "GAME"
+    gamestates[3] = "ENDSCREEN"
+
+    -- up down left right start select A B
+    local gs = memory.readbyte(ram_table["_GameState"])
+
+    print("Game on state", gamestates[gs])
+
+    -- if not on game mode, move to game mode
+    if (gamestates[gs] == gamestates[2])
+    then
+        inputtable["start"] = true
+        inputtable["select"] = true
+        joypad.write(1, inputtable)
+        utils.wait(5, "Current mode = ".. gamestates[gs])
+        execute(ram_table)
+    else 
+        if (gamestates[gs] == gamestates[0])
+        then
+            --
+        else
+            inputtable["start"] = true
+            joypad.write(1, inputtable)
+            utils.wait(5, "Current mode = ".. gamestates[gs])
+            execute(ram_table)
+        end
+    end
+end
+
+M.game = execute
+
+M.menu = goToMenu
+
 return M

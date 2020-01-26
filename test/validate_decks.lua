@@ -5,7 +5,7 @@ local function execute(ram_table)
     local function readCursor(idx)
         return memory.readbyte(ram_table["_cursor"]+idx)
     end
-
+    local res = 0;
     print("Deck Shuffling Test")
     -- up down left right start select A B
     local gs = memory.readbyte(ram_table["_GameState"])
@@ -22,10 +22,7 @@ local function execute(ram_table)
     print(cursor)
     -- has 6 chars, first 5 are a card, last one is the cell
 
-
-    local inputtable = {}
-    joypad.write(1, inputtable); 
-    return 
+    return res, 8
 end
 M.execute = execute
  
