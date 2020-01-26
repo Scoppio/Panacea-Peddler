@@ -14,7 +14,6 @@ local function execute(ram_table)
         local cursor = {}
         cursor.id = memory.readbyte(ram_table["_cursor"])
         cursor.cell = memory.readbyte(ram_table["_cursor"]+2)
-        print(cursor)
         return cursor
     end
 

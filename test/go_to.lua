@@ -2,7 +2,7 @@ local utils = require(".utils")
 
 local M = {}
  
-local function execute(ram_table)
+local function game(ram_table)
     local inputtable = {}
     
     local gamestates = {}
@@ -24,13 +24,19 @@ local function execute(ram_table)
         inputtable["start"] = true
         joypad.write(1, inputtable)
         utils.wait(5, "Current mode = ".. gamestates[gs])
-        execute(ram_table)
+        game(ram_table)
     end
 end
 
-local function goToMenu(ram_table)
+local function menu(ram_table)
     
-    
+    local function moveAndUpdate(key)
+        local tt = {}
+        tt[key] = true
+        joypad.write(1, tt)
+        utils.wait(5, "Changing gameState")
+    end
+
     local gamestates = {}
     gamestates[0] = "MENU"
     gamestates[1] = "MENU_SETTINGS"
@@ -42,29 +48,18 @@ local function goToMenu(ram_table)
 
     print("Game on state", gamestates[gs], "target is ".. gamestates[0])
     -- if not on game mode, move to game mode
-    if (gamestates[gs] == gamestates[2])
-    then
-        local inputtable = {}
-        inputtable["select"] = true
-        joypad.write(1, inputtable)
-        utils.wait(60, "Current mode = ".. gamestates[gs])
-        execute(ram_table)
+    if (gamestates[gs] == gamestates[2]) then
+        moveAndUpdate("select")
+        menu(ram_table)
     else 
-        if (gamestates[gs] == gamestates[0])
-        then
-            --
-        else
-            local inputtable = {}
-            inputtable["start"] = true
-            joypad.write(1, inputtable)
-            utils.wait(5, "Current mode = ".. gamestates[gs])
-            execute(ram_table)
+        if (gamestates[gs] ~= gamestates[0]) then
+            moveAndUpdate("start")
+            menu(ram_table)
         end
     end
 end
 
-M.game = execute
-
-M.menu = goToMenu
+M.game = game
+M.menu = menu
 
 return M

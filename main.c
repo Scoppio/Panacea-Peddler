@@ -108,12 +108,12 @@ void end_of_round(void) {
 		return;
 	}
 
-	i = count_points();
+	w = count_points();
 	if (i > 0) {
-		round_score += i;
+		round_score += w;
 		round--;
 	}
-	if (round == 0 || i < 0) {
+	if (round == 0 || w < 0) {
 		GameState = ENDSCREEN;
 	}
 }

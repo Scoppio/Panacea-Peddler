@@ -1,0 +1,41 @@
+local ram_debug_parser = require(".ram_debug_parser")
+local go_to = require(".go_to")
+local utils = require(".utils")
+local deck_test = require(".deck_test")
+local menu_test = require(".menu_test")
+local game_controller_test = require(".game_controller_test")
+
+-- base material for scoring tests and accessing memory variables
+local gamesramnl = "C:\\Users\\scoppio\\Documents\\Projects\\NES\\Panacea-Peddler\\output\\game.nes.ram.nl"
+local ram_table = ram_debug_parser.execute(gamesramnl)
+local t = {}
+
+-- test procedure
+utils.wait_a_sec("Running Tests")
+go_to.menu(ram_table)
+t.menu, t.menu_max = menu_test.execute(ram_table)
+go_to.game(ram_table)
+t.decks, t.deck_max = deck_test.execute(ram_table)
+t.play_card, t.play_card_max = game_controller_test.execute(ram_table)
+t.score_card, t.score_card_max =  0, 1
+
+-- show test score
+local text_menu = "menu: " .. t.menu .. "/" .. t.menu_max
+local text_deck = "decks: " .. t.decks .. "/" .. t.deck_max
+local text_play_card = "play card: " .. t.play_card .. "/".. t.play_card_max
+local text_score_card = "score card: " .. t.score_card .. "/" .. t.score_card_max
+
+print("Test results:")
+print(text_menu)
+print(text_deck)
+print(text_play_card)
+print(text_score_card)
+
+while (true) do
+    gui.text(50,50, "Tests results")
+    gui.text(50,60, text_menu)
+    gui.text(50,70, text_deck)
+    gui.text(50,80, text_play_card)
+    gui.text(50,90, text_score_card)
+    emu.frameadvance();
+end

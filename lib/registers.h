@@ -5,10 +5,10 @@ unsigned char j = 0;
 unsigned char t = 0;
 unsigned int w = 0;
 
-static unsigned char ones = 0;
-static unsigned char tens = 0;
-static unsigned char hundreds = 0;
-static unsigned char thousands = 0;
+unsigned char ones = 0;
+unsigned char tens = 0;
+unsigned char hundreds = 0;
+unsigned char thousands = 0;
 
 static const unsigned char ZERO_CHAR = '0';
 

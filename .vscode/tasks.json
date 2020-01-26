@@ -54,12 +54,12 @@
             "type": "shell",
             "command": "fceux.exe",
             "args": [
-                "-lua", "./test/full_test_suite.lua", "./output/game.nes"
+                "-lua", "./test/application_test.lua", "./output/game.nes"
             ],
             "windows": {
                 "command": "C:\\Users\\scoppio\\Documents\\Projects\\NES\\Devkit\\fceux-2.2.3-win32\\fceux.exe",
                 "args": [
-                    "-lua", "C:\\Users\\scoppio\\Documents\\Projects\\NES\\Panacea-Peddler\\test\\full_test_suite.lua", ".\\output\\game.nes"
+                    "-lua", "C:\\Users\\scoppio\\Documents\\Projects\\NES\\Panacea-Peddler\\test\\application_test.lua", ".\\output\\game.nes"
                 ]
             },
             "group": "test",

@@ -1,14 +1,14 @@
 unsigned char pad1;
 unsigned char pad1_new;
 // static const unsigned char text[] = "Clock:"; // zero terminated c string
-static unsigned char datetime[] = "00:00:00";
-static unsigned char score_text[10] = "abc - 9999";
+unsigned char datetime[] = "00:00:00";
+unsigned char score_text[10] = "abc - 9999";
 // static unsigned char debug_text[10] = "          ";
 
-static unsigned char second = 0;
-static unsigned char minute = 0;
-static unsigned char hour = 0;
-static unsigned char counter = 60;
+unsigned char second = 0;
+unsigned char minute = 0;
+unsigned char hour = 0;
+unsigned char counter = 60;
 static const unsigned char SIXTY = 60;
 
 void _clock_counter(void)
@@ -69,21 +69,22 @@ struct Cursor
 // struct SpObject Ball = {0xff, 0xff, 5, 5}; // balls x and x will be init later
 
 struct Card *table[4];
-static unsigned char cards_size_ptr[4] = {0,0,0,0};
+
+unsigned char cards_size_ptr[4] = {0,0,0,0};
 
 static signed int best_scores[5] = {0, 0, 0, 0, 0};
-static signed int round_score = 0;
-static unsigned char round = 0;
+signed int round_score = 0;
+unsigned char round = 0;
 
-static unsigned char red_bc_count = 3;
-static unsigned char yellow_bc_count = 3;
-static unsigned char green_bc_count = 3;
-static unsigned char blue_bc_count = 3;
+unsigned char red_bc_count = 3;
+unsigned char yellow_bc_count = 3;
+unsigned char green_bc_count = 3;
+unsigned char blue_bc_count = 3;
 
-static unsigned char red_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-static unsigned char yellow_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-static unsigned char green_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-static unsigned char blue_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+unsigned char red_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+unsigned char yellow_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+unsigned char green_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+unsigned char blue_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
 /*
 
