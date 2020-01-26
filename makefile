@@ -56,12 +56,12 @@ $(ODIR)/%.o: $(ODIR)/%.s
 # Create game
 game.nes: $(DEPS)
 	$(LD) $(LDFLAGS) -o $(ODIR)/$@ $^ $(BUILD_FILES) $(LABELS) $(EXTRAS)
-
+	python scripts/fceux_symbols.py $(ODIR)/game.labels.txt
 
 .PHONY: clean
 
 clean:
-	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.nes $(ODIR)/*.txt $(ODIR)/*.dbg
+	$(REMOVE) $(ODIR)/*
 
 clean-misc:
-	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt $(ODIR)/*.dbg
+	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt $(ODIR)/*.dbg $(ODIR)/*.deb
