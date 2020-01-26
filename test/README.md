@@ -8,15 +8,15 @@ When Lua starts, the emulator pauses and hands control over to Lua. Lua (that's 
 
 A bare script looks like this:
 
-```
-    while (true) do
-        emu.frameadvance();
-    end;
-```
+    ```
+        while (true) do
+            emu.frameadvance();
+        end;
+    ```
 
 And is about equal to not running Lua at all. The frameadvance function is the same called internally, so no loss of speed there!
 
-## Bitwise operators:
+## Bitwise operators
 
 Lua does not have bitwise operators, so we supply some for you. These are common bitwise operators, nothing fancy.
 
@@ -30,7 +30,7 @@ BIT(n); -- returns a number with only bit n set (1)
 
 The emulator specific Lua is equal to the one of snes9x, with some platform specific changes (few buttons, for instance).
 
-You can find the reference here: http://dehacked.2y.net/snes9x-lua.html
+You can find the reference here: <http://dehacked.2y.net/snes9x-lua.html>
 
 The following is a quick reference, you can go to the snes9x reference for more details.
 
@@ -50,12 +50,11 @@ gui.getpixel(x,y); -- return the values of the pixel at given position. Returns 
 
 gui.gdscreenshot(); -- Takes a screen shot of the image and returns it in the form of a string which can be imported by the gd library using the gd.createFromGdStr() function
 
-(for more gd functions see DeHackED's reference: http://dehacked.2y.net/snes9x-lua.html)
+(for more gd functions see DeHackED's reference: <http://dehacked.2y.net/snes9x-lua.html>)
 
 PAINTING IS ALWAYS ONE FRAME BEHIND! This is because the painting is done at the creation of the next frame, not while Lua is running.
 
-
-## Emulator control:
+## Emulator control
 
 emu.frameadvance(); -- advances emulation ONE frame
 
@@ -65,7 +64,7 @@ emu.speedmode(strMode); -- Supported are "normal","turbo","nothrottle","maximum"
 
 emu.wait(); -- skips the emulation of the next frame, in case your script needs to wait for something
 
-## Memory control:
+## Memory control
 
 memory.readbyte(adr); -- read one byte from given address and return it. Besides decimal values Lua also allows the hex notation 0x00FA. In FCEUX reading is done BEFORE the cheats are applied!
 
@@ -75,17 +74,17 @@ memory.readbytesigned(adr); -- same as readbyte, except this returns a signed va
 
 memory.register(adr, function); -- binds a function to an address. The function will be called when an address changes. NOTE THAT THIS IS EXPENSIVE (eg.: slow)! Only one function allowed per address.
 
-## Input control:
+## Input control
 
 You can read and write input by using the joypad table. A input table has the following (case sensitive) keys, where nil denotes they are not to be pressed: up down left right start select A B
+
+The input table must have a true or false value for the keys you want.
 
 joypad.read(playern); -- get the input table for the player who's input you want to read (a number!)
 
 joypad.write(playern, inputtable); -- set the input for player n. Note that this will overwrite any input from the user, and only when this is used.
 
-
-## Savestates:
-
+## Savestates
 
 You can load and save to the predefined savestates 1 ... 9 or create new "anonymous" savestates. You must first create a savestate object, which is your handle to a savestate. Then you can pass this handle on to savestate.load or save to do so.
 

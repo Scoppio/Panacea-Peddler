@@ -14,7 +14,7 @@ local function execute(ram_table)
     -- up down left right start select A B
     local gs = memory.readbyte(ram_table["_GameState"])
 
-    print("Game on state", gamestates[gs])
+    print("Game on state", gamestates[gs], "target is ".. gamestates[2])
 
     -- if not on game mode, move to game mode
     if (gamestates[gs] == gamestates[2]) 
@@ -29,7 +29,7 @@ local function execute(ram_table)
 end
 
 local function goToMenu(ram_table)
-    local inputtable = {}
+    
     
     local gamestates = {}
     gamestates[0] = "MENU"
@@ -40,21 +40,21 @@ local function goToMenu(ram_table)
     -- up down left right start select A B
     local gs = memory.readbyte(ram_table["_GameState"])
 
-    print("Game on state", gamestates[gs])
-
+    print("Game on state", gamestates[gs], "target is ".. gamestates[0])
     -- if not on game mode, move to game mode
     if (gamestates[gs] == gamestates[2])
     then
-        inputtable["start"] = true
+        local inputtable = {}
         inputtable["select"] = true
         joypad.write(1, inputtable)
-        utils.wait(5, "Current mode = ".. gamestates[gs])
+        utils.wait(60, "Current mode = ".. gamestates[gs])
         execute(ram_table)
     else 
         if (gamestates[gs] == gamestates[0])
         then
             --
         else
+            local inputtable = {}
             inputtable["start"] = true
             joypad.write(1, inputtable)
             utils.wait(5, "Current mode = ".. gamestates[gs])

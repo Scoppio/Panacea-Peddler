@@ -324,10 +324,9 @@ void controller_game(void)
 	{
 		cursor.cell &= 0x3;
 	}
-	if (BTN(PAD_START) && BTN(PAD_SELECT))
+	if (BTN(PAD_SELECT))
 	{
 		GameState = ENDSCREEN;
-		reset_game();
 	}
 }
 
@@ -340,18 +339,18 @@ void controller_endscreen(void)
 	// setup best_scores
 	for (j = 0; j < 5; j++)
 	{
-		i = best_scores[j];
-		convert_i_to_decimal();
+		w = best_scores[j];
+		convert_w_to_decimal();
 		
-		score_text[0] = 'L'+j;
-		score_text[1] = 'S'+j;
-		score_text[2] = 'C'+j;
+		score_text[0] = 'L' + j;
+		score_text[1] = 'S' + j;
+		score_text[2] = 'C' + j;
 		score_text[6] = thousands;
 		score_text[7] = hundreds;
 		score_text[8] = tens;
 		score_text[9] = ones;
 		
-		PRINT_AT(10, 3+j, score_text);
+		PRINT_AT(10, 3 + j*2, score_text);
 	}
 }
 

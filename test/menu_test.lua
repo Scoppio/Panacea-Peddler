@@ -16,6 +16,7 @@ local function execute(ram_table)
     print("GameState ".. gamestates[gs])
 
     if (gamestates[gs] == gamestates[0]) then
+        print("Menu Test::Is on Menu - sucess")
         res = res +1
         local inputtable = {}
         inputtable["select"] = true
@@ -24,8 +25,14 @@ local function execute(ram_table)
         gs = memory.readbyte(ram_table["_GameState"])
         if (gamestates[gs] == gamestates[1]) then
             -- do nothing
+            print("Menu Test::Enter on Menu Settings - sucess")
             res = res + 1
+        else
+            print("Menu Test::Enter on Menu Settings - fail")
         end
+    else
+        print("Menu Test::Is on Menu - fail")
+        print("Menu Test::Enter on Menu Settings - fail")
     end
     return res, 2
 end
