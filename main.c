@@ -10,6 +10,7 @@
 #include "lib/registers.h"
 #include "main.h"
 #include "sprites.h"
+#include "cheats.h"
 
 // there's some oddities in the palette code, black must be 0x0f, white must be 0x30
 
@@ -87,7 +88,6 @@ void _update60(void)
 	// do nothing atm;
 	controller();
 	end_of_round();
-
 }
 
 /* End of turn
@@ -115,6 +115,10 @@ void end_of_round(void) {
 	}
 	if (round == 0 || w < 0) {
 		GameState = ENDSCREEN;
+	}
+	if (cheat_num == CHEAT_RESET_ROUND) {
+		reset_game();
+		cheat_num = CHEAT_DISABLED;
 	}
 }
 
@@ -151,18 +155,6 @@ void shuffle_decks(void)
 	instantiate_card_modifiers(yellow_cards);
 }
 
-void instantiate_card_modifiers(struct Card * cards)
-{
-	for (i = 0; i < DECK_CARDS_SIZE; i++) {
-		if (cards[i].Lmodifier != M_NONE) {
-			cards[i].Lmodifier = RANDOM_MODIFIER;
-		}
-		if (cards[i].Rmodifier != M_NONE) {
-			cards[i].Rmodifier = RANDOM_MODIFIER;
-		}
-	}
-}
-
 void shuffle(unsigned char (*array)[13])
 {
 	for (i = 0; i < DECK_CARDS_SIZE; i++)
@@ -177,6 +169,17 @@ void shuffle(unsigned char (*array)[13])
 	}
 }
 
+void instantiate_card_modifiers(struct Card * cards)
+{
+	for (i = 0; i < DECK_CARDS_SIZE; i++) {
+		if (cards[i].Lmodifier != M_NONE) {
+			cards[i].Lmodifier = RANDOM_MODIFIER;
+		}
+		if (cards[i].Rmodifier != M_NONE) {
+			cards[i].Rmodifier = RANDOM_MODIFIER;
+		}
+	}
+}
 
 /*	Interact with table
 *
@@ -185,7 +188,7 @@ void shuffle(unsigned char (*array)[13])
 */
 void interact_with_table()
 {
-	if (cursor.card == NULL) {
+	if (cursor.cell < 4 && cursor.card == NULL) {
 		// pickup card
 		switch (cursor.cell)
 		{
@@ -220,14 +223,12 @@ void interact_with_table()
 		}
 	} else {
 		// place card on table
-		if (cursor.cell > 3) {
-			i = cursor.cell-4;
-			if (table[i] == NULL) {
-				table[i] = cursor.card;
-				cursor.card = NULL;
-			} else {
-				play_sound(snd_ILLEGAL_ACTION);
-			}
+		i = cursor.cell-4;
+		if (cursor.cell > 3 && table[i] == NULL) {
+			table[i] = cursor.card;
+			cursor.card = NULL;
+		} else {
+			play_sound(snd_ILLEGAL_ACTION);
 		}
 	}
 }
@@ -310,11 +311,14 @@ void controller_game(void)
 	}
 	if (BTN(PAD_LEFT))
 	{
-		cursor.cell = cursor.cell == 0 ? 3 : cursor.cell - 1;
+		cursor.cell = cursor.cell == 0 ? 3 : cursor.cell == 4 ? 7 : cursor.cell - 1;
+		// cursor.cell = cursor.cell-1 & 0x03;
 	}
 	if (BTN(PAD_RIGHT))
 	{
-		cursor.cell = cursor.cell == 3 ? 0 : cursor.cell + 1;
+		
+        cursor.cell = cursor.cell == 3 ? 0 : cursor.cell == 7 ? 4 : cursor.cell + 1;
+		// cursor.cell = cursor.cell+1 & 0x03;
 	}
 	if (BTN(PAD_UP))
 	{

@@ -1,0 +1,2 @@
+#define CHEAT_DISABLED 0
+#define CHEAT_RESET_ROUND 1

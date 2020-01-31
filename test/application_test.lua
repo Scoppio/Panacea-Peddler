@@ -1,7 +1,6 @@
-local ram_debug_parser = require(".ram_debug_parser")
-local go_to = require(".go_to")
 local utils = require(".utils")
 local gint = require(".game_interface")
+
 local deck_test = require(".deck_test")
 local menu_test = require(".menu_test")
 local game_controller_test = require(".game_controller_test")
@@ -11,11 +10,11 @@ local t = {}
 
 -- test procedure
 utils.wait_a_sec("Running Tests")
--- go_to.menu(ram_table)
-gint.gotoMenu()
+
+gint.gotoMenu(true)
 t.menu, t.menu_max = menu_test.execute()
--- go_to.game(ram_table)
-gint.gotoGame()
+gint.gotoGame(true)
+utils.wait_a_sec()
 t.decks, t.deck_max = deck_test.execute()
 t.play_card, t.play_card_max = game_controller_test.execute()
 t.score_card, t.score_card_max =  0, 1

@@ -5,11 +5,12 @@ local gint = require(".game_interface")
 local M = {}
 
 local function execute()
-    -- up down left right start select A B
     assertions.createTestContext("menu_test")
+    
     gint.input("select")
-    assertions.assertEquals(gamestates[1], gint.getGameState(), "Enter Menu Settings from Menu")
-    return ctx.passed, ctx.total_tests
+    local gs = gint.getGameState()
+    assertions.assertEquals("MENU_SETTINGS", gs, "Enter Menu Settings from Menu")
+    return assertions.getPassed(), assertions.getTotal()
 end
 
 M.execute = execute

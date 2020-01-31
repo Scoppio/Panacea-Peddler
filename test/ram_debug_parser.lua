@@ -20,7 +20,7 @@ local function execute(file)
         return lines
     end
 
-    print("Loading ram file")
+    -- print("Loading ram file")
         
     -- tests the functions above
     local lines = lines_from(file)
@@ -31,7 +31,7 @@ local function execute(file)
         local label = v:sub(7, v:len()-1)
         local line = k
         local addr = v:sub(2,5)
-        print('line[' .. k .. ']', addr, "-", label)
+        -- print('line[' .. k .. ']', addr, "-", label)
         ram_table[label] = tonumber(addr, 16)
     end
     
