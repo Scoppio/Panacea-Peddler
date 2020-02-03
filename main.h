@@ -4,7 +4,7 @@ unsigned char pad1_new;
 unsigned char datetime[] = "00:00:00";
 unsigned char score_text[10] = "abc - 9999";
 // static unsigned char debug_text[10] = "          ";
-
+unsigned int tick = 0;
 unsigned char second = 0;
 unsigned char minute = 0;
 unsigned char hour = 0;
@@ -13,6 +13,7 @@ static const unsigned char SIXTY = 60;
 
 void _clock_counter(void)
 {
+    tick++;
     counter--;
     if (counter == 0)
     {
@@ -69,11 +70,12 @@ struct Cursor
 // struct SpObject Ball = {0xff, 0xff, 5, 5}; // balls x and x will be init later
 
 struct Cursor cursor;
-
 struct Card *table[4];
 
-unsigned char cards_size_ptr[4] = {0,0,0,0};
+struct Card *(*table_ptr)[4] = &table;
 
+unsigned char cards_size_ptr[4] = {0,0,0,0};
+unsigned char placed_on_table = NULL;
 static signed int best_scores[5] = {0, 0, 0, 0, 0};
 signed int round_score = 0;
 unsigned char round = 0;
@@ -98,8 +100,8 @@ unsigned char blue_idx[13] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
  *  3 = red
  * */
 
-static struct Card blue_cards[] = {
-    {0x00, 1, BLUE_CARD, M_NONE, M_NONE},
+struct Card blue_cards[] = {
+    {0x0E, 1, BLUE_CARD, M_NONE, M_NONE},
     {0x01, 1, BLUE_CARD, M_NONE, M_NONE},
     {0x02, 1, BLUE_CARD, M_NONE, M_NONE},
     {0x03, 1, BLUE_CARD, BLUE_CARD, M_NONE},
@@ -113,7 +115,7 @@ static struct Card blue_cards[] = {
     {0x0B, -3, BLACK_CARD, M_NONE, GREEN_CARD},
     {0x0C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
-static struct Card green_cards[] = {
+struct Card green_cards[] = {
     {0x10, 1, GREEN_CARD, M_NONE, M_NONE},
     {0x11, 1, GREEN_CARD, M_NONE, M_NONE},
     {0x12, 1, GREEN_CARD, M_NONE, M_NONE},
@@ -128,7 +130,7 @@ static struct Card green_cards[] = {
     {0x1B, -3, BLACK_CARD, M_NONE, GREEN_CARD},
     {0x1C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
-static struct Card yellow_cards[] = {
+struct Card yellow_cards[] = {
     {0x20, 1, YELLOW_CARD, M_NONE, M_NONE},
     {0x21, 1, YELLOW_CARD, M_NONE, M_NONE},
     {0x22, 1, YELLOW_CARD, M_NONE, M_NONE},
@@ -143,7 +145,7 @@ static struct Card yellow_cards[] = {
     {0x2B, -3, BLACK_CARD, M_NONE, RED_CARD},
     {0x2C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
-static struct Card red_cards[] = {
+struct Card red_cards[] = {
     {0x30, 1, RED_CARD, M_NONE, M_NONE},
     {0x31, 1, RED_CARD, M_NONE, M_NONE},
     {0x32, 1, RED_CARD, M_NONE, M_NONE},
@@ -157,11 +159,6 @@ static struct Card red_cards[] = {
     {0x3A, -2, BLACK_CARD, M_RANDOM, M_NONE},
     {0x3B, -3, BLACK_CARD, M_NONE, M_RANDOM},
     {0x3C, -1, BLACK_CARD, M_NONE, M_NONE}};
-
-struct Card mem_blue_cards[13];
-struct Card mem_green_cards[13];
-struct Card mem_yellow_cards[13];
-struct Card mem_red_cards[13];
 
 struct Card temp_card;
 
@@ -207,4 +204,3 @@ void interact_with_table(void);
 void cancel_card(void);
 void end_of_round(void);
 int count_points(void);
-

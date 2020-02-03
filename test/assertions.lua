@@ -8,7 +8,7 @@ local function assertNotNull(actual, message)
         test_message(message)
         ctx.passed = ctx.passed + 1
     else
-        print(ctx.test_class .. " - " .. message .. " - fail")
+        test_message_on_fail(message)
         ctx.failed = ctx.failed + 1
     end
     ctx.total_tests = ctx.total_tests + 1
@@ -22,9 +22,9 @@ local function assertNotEquals(expected, actual, message)
     else
         actual = actual and actual or "nil"
         expected = expected and expected or "nil"
-        print(ctx.test_class .. " - " .. message .. " - fail")
-        print("Not Expected: "  .. expected)
-        print("Actual: "  .. actual)
+        test_message_on_fail(message)
+        print("Not Expected: ", expected)
+        print("Actual: ", actual)
         ctx.failed = ctx.failed + 1
     end
     ctx.total_tests = ctx.total_tests + 1
@@ -37,7 +37,7 @@ local function assertEquals(expected, actual, message)
     else
         actual = actual and actual or "nil"
         expected = expected and expected or "nil"
-        print(ctx.test_class .. " - " .. message .. " - fail")
+        test_message_on_fail(message)
         print("Expected:", expected)
         print("Actual:", actual)
         print("")
@@ -53,7 +53,7 @@ local function assertTrue(test, message)
     else
         actual = actual and actual or "nil"
         expected = expected and expected or "nil"
-        print(ctx.test_class .. " - " .. message .. " - fail")
+        test_message_on_fail(message)
         print("Expected: true")
         print("Actual: false")
         ctx.failed = ctx.failed + 1
@@ -68,7 +68,7 @@ local function assertFalse(test, message)
     else
         actual = actual and actual or "nil"
         expected = expected and expected or "nil"
-        print(ctx.test_class .. " - " .. message .. " - fail")
+        test_message_on_fail(message)
         print("Expected: false")
         print("Actual: true")
         ctx.failed = ctx.failed + 1
@@ -98,6 +98,10 @@ end
 
 function test_message(message)
     print("[" .. ctx.total_tests+1 .. "] " .. ctx.test_class .. " - " .. message .. " - success")
+end
+
+function test_message_on_fail(message)
+    print("[" .. ctx.total_tests+1 .. "] " .. ctx.test_class .. " - " .. message .. " - fail")
 end
 
 function equals(o1, o2, ignore_mt)

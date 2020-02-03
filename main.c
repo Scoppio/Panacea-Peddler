@@ -67,7 +67,7 @@ void reset_game(void)
 	table[1] = NULL;
 	table[2] = NULL;
 	table[3] = NULL;
-	
+
 	red_size_pt = 0;
 	yellow_size_pt = 0;
 	green_size_pt = 0;
@@ -126,14 +126,14 @@ int count_points(void) {
 	int val = 0;
 	int temp = 0;
 	for (i=0; i<4; i++) {
-		temp = table[i]->value;
+		temp = (*table_ptr)[i]->value;
 		if (i > 0) {
-			if (table[i]->Lmodifier == table[i-1]->color) {
+			if ((*table_ptr)[i]->Lmodifier == (*table_ptr)[i-1]->color) {
 				val+=temp;
 			}
 		}
 		if (i < 3) {
-			if (table[i]->Rmodifier == table[i+1]->color) {
+			if ((*table_ptr)[i]->Rmodifier == (*table_ptr)[i+1]->color) {
 				val+=temp;
 			}
 		}
@@ -157,6 +157,7 @@ void shuffle_decks(void)
 
 void shuffle(unsigned char (*array)[13])
 {
+	set_rand(tick);
 	for (i = 0; i < DECK_CARDS_SIZE; i++)
 	{
 		do
@@ -171,6 +172,7 @@ void shuffle(unsigned char (*array)[13])
 
 void instantiate_card_modifiers(struct Card * cards)
 {
+	set_rand(tick);
 	for (i = 0; i < DECK_CARDS_SIZE; i++) {
 		if (cards[i].Lmodifier != M_NONE) {
 			cards[i].Lmodifier = RANDOM_MODIFIER;
@@ -223,14 +225,26 @@ void interact_with_table()
 		}
 	} else {
 		// place card on table
-		i = cursor.cell-4;
-		if (cursor.cell > 3 && table[i] == NULL) {
-			table[i] = cursor.card;
+		if (cursor.cell - 4 >= 0 && cursor.cell -4 < 4 && (*table_ptr)[cursor.cell-4] == NULL) {
+			(*table_ptr)[cursor.cell-4] = cursor.card;
 			cursor.card = NULL;
+			placed_on_table = cursor.card->id;
 		} else {
 			play_sound(snd_ILLEGAL_ACTION);
 		}
+		
+
+		// placed_on_table = placed_on_table << 1;
 	}
+}
+
+void copycard(struct Card * target, struct Card * origin)
+{
+	target->id = origin->id;
+	target->color = origin->color;
+	target->Lmodifier = origin->Lmodifier;
+	target->Rmodifier = origin->Rmodifier;
+	target->value = origin->value;
 }
 
 /*	Cancel Card
@@ -454,10 +468,6 @@ void draw_bg(void)
 
 	// ppu_on_all();
 }
-
-
-
-
 
 void main(void)
 {
