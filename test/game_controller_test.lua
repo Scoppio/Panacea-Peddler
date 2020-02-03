@@ -43,18 +43,13 @@ local function execute(ram_table)
     assertions.assertNotNull(card, "cursor must have a card")
     gint.input("up")
     assertions.assertEquals(4, gint.readCursor().cell, "Pressing up moves to cell 4")
-    gint.readCardOnCell(4, true)
+    gint.readCardOnCell(4)
     gint.input("A")
     local cursor_h = gint.readCursor()
-    local c_card, c_cell = cursor_h.card, cursor_h.cell
-    print("pressing A over empty table removes card ",card, c_card)
+    local c_card, c_cell = cursor_h.card, cursor_h.c_cell
     assertions.assertNotEquals(card, c_card, "pressing A on cell 4 removes card from cursor")
-    
-    c_card = gint.readCardOnCell(c_cell, true)
-    assertions.assertEquals(card, gint.readCardOnCell(c_cell, true), "pressing A on cell 4 put card on table")
-    print("flag placed on table", gint.readFlag("_placed_on_table"))
-    print("pressing A over empty table puts card on table", c_card)
-
+    c_card = gint.readCardOnCell(c_cell)
+    assertions.assertEquals(card, gint.readCardOnCell(c_cell), "pressing A on cell 4 put card on table")
     gint.input("select")
     assertions.assertEquals(gint.gameStates()[3], gint.getGameState(), "pressing select opens endscreen")
 
