@@ -2,8 +2,8 @@ unsigned char pad1;
 unsigned char pad1_new;
 // static const unsigned char text[] = "Clock:"; // zero terminated c string
 unsigned char datetime[] = "00:00:00";
-unsigned char score_text[10] = "abc - 9999";
-// static unsigned char debug_text[10] = "          ";
+unsigned char score_text[] = "abc - 9999";
+
 unsigned int tick = 0;
 unsigned char second = 0;
 unsigned char minute = 0;
@@ -204,3 +204,4 @@ void interact_with_table(void);
 void cancel_card(void);
 void end_of_round(void);
 int count_points(void);
+void print_scores(void); 

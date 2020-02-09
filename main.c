@@ -16,6 +16,8 @@
 
 #pragma bss - name(push, "ZEROPAGE")
 
+#define DEBUG
+
 // Game states
 #define MENU 0
 #define MENU_SETTINGS 1
@@ -54,9 +56,9 @@ void _init(void)
 	pal_bg(palette_bg);  //	load the BG palette
 	pal_spr(palette_sp); // load the Sprite palette
 	ppu_on_all();		 //	turn on screen
-	bank_spr(1);
-	draw_bg();
-	reset_game();
+	set_vram_buffer();	 // PPU pointed to VRAM Buffer
+	bank_spr(1);		 // set bank for sprite
+	reset_game();		 // reset game variables
 }
 
 void reset_game(void)
@@ -88,6 +90,17 @@ void _update60(void)
 	// do nothing atm;
 	controller();
 	end_of_round();
+}
+
+void put_str(unsigned int adr, const char *str)
+{
+	vram_adr(adr);
+
+	while(1)
+	{
+		if(!*str) break;
+		vram_put((*str++)-0x20);//-0x20 because ASCII code 0x20 is placed in tile 0 of the CHR
+	}
 }
 
 /* End of turn
@@ -354,22 +367,6 @@ void controller_endscreen(void)
 	{
 		GameState = MENU;
 	}
-	// setup best_scores
-	for (j = 0; j < 5; j++)
-	{
-		w = best_scores[j];
-		convert_w_to_decimal();
-		
-		score_text[0] = 'L' + j;
-		score_text[1] = 'S' + j;
-		score_text[2] = 'C' + j;
-		score_text[6] = thousands;
-		score_text[7] = hundreds;
-		score_text[8] = tens;
-		score_text[9] = ones;
-		
-		PRINT_AT(10, 3 + j*2, score_text);
-	}
 }
 
 void controller_menu(void)
@@ -388,11 +385,42 @@ void controller_menu(void)
 
 void _draw(void)
 {
-	ppu_wait_nmi();
+
+#ifdef DEBUG
 	timer_draw();
-	
+#endif
+
+	if (GameState == ENDSCREEN) {
+		print_scores();
+	}
+
 	//draw_card_piles();
 	//draw_cards_table();
+
+	ppu_wait_nmi(); 
+	clear_vram_buffer();
+}
+
+const unsigned char SCORE_TEXT [] = "SCORE:";
+
+void print_scores(void) 
+{
+	multi_vram_buffer_horz(SCORE_TEXT, sizeof(SCORE_TEXT), NTADR_A(10, 6));
+	for (j = 0; j < 5; j++)
+	{
+		w = best_scores[j];
+		convert_w_to_decimal();
+		
+		score_text[0] = 'L' + j;
+		score_text[1] = 'S' + j;
+		score_text[2] = 'C' + j;
+		score_text[6] = thousands;
+		score_text[7] = hundreds;
+		score_text[8] = tens;
+		score_text[9] = ones + j;
+		
+		multi_vram_buffer_horz(score_text, sizeof(score_text), NTADR_A(10, 8 + j*2));
+	}
 }
 
 void timer_draw(void)
@@ -410,9 +438,9 @@ void timer_draw(void)
 	convert_i_to_decimal();
 	datetime[1] = ones;
 	datetime[0] = tens;
-	PRINT_AT(10, 2, datetime);
-}
 
+	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(10,2));
+}
 
 void draw_sprites(void)
 {
@@ -422,51 +450,6 @@ void draw_sprites(void)
 	// draw 2 metasprites
 	oam_meta_spr(28, 120, PaddleSpr);
 	oam_meta_spr(47, 97, BallSpr);
-}
-
-void draw_bg(void)
-{
-	// ppu_off(); // screen off
-
-	// vram_adr(NAMETABLE_A);
-	// // this sets a start position on the BG, top left of screen
-
-	// vram_unrle(breaky_bg2);
-	// // this unpacks a compressed full nametable
-
-	// memcpy(c_map, c1, 256);
-	// // copy the collision map to c_map
-
-	// vram_adr(NTADR_A(0, 6));
-	// // sets a start address, skipping the top of the screen
-
-	// for (temp_y = 0; temp_y < 16; ++temp_y)
-	// {
-	// 	for (temp_x = 0; temp_x < 16; ++temp_x)
-	// 	{
-	// 		temp1 = (temp_y << 4) + temp_x;
-	// 		if ((temp_x == 0) || (temp_x == 15))
-	// 		{
-	// 			vram_put(0x10); // wall at the edges
-	// 			vram_put(0x10);
-	// 		}
-	// 		else
-	// 		{
-	// 			if (c_map[temp1])
-	// 			{					// if block = yes
-	// 				vram_put(0x11); // draw block
-	// 				vram_put(0x12);
-	// 			}
-	// 			else
-	// 			{
-	// 				vram_put(0); // else draw blank
-	// 				vram_put(0);
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// ppu_on_all();
 }
 
 void main(void)

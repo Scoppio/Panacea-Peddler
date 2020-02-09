@@ -46,7 +46,7 @@ local function execute(ram_table)
     gint.readCardOnCell(4)
     gint.input("A")
     local cursor_h = gint.readCursor()
-    local c_card, c_cell = cursor_h.card, cursor_h.c_cell
+    local c_card, c_cell = cursor_h.card, cursor_h.cell
     assertions.assertNotEquals(card, c_card, "pressing A on cell 4 removes card from cursor")
     c_card = gint.readCardOnCell(c_cell)
     assertions.assertEquals(card, gint.readCardOnCell(c_cell), "pressing A on cell 4 put card on table")

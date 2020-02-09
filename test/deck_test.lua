@@ -11,12 +11,12 @@ local function execute()
     --  1 = green
     --  2 = yellow
     --  3 = red
-    local blue = gint.readCardOnCell(0).id ~= 0
-    local green = gint.readCardOnCell(1).id ~= 16
-    local yellow = gint.readCardOnCell(2).id ~= 32
-    local red = gint.readCardOnCell(3).id ~= 48
+    local blue = bit.rshift(gint.readCardOnCell(0).id, 4) == 0
+    local green = bit.rshift(gint.readCardOnCell(1).id, 4) == 1
+    local yellow = bit.rshift(gint.readCardOnCell(2).id, 4) == 2
+    local red = bit.rshift(gint.readCardOnCell(3).id, 4) == 3
     
-    assertions.assertTrue(blue or green or yellow or red, "shuffle worked")
+    assertions.assertTrue(blue and green and yellow and red, "shuffle worked")
     
     return assertions.getPassed(), assertions.getTotal()
 end
