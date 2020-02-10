@@ -11,6 +11,7 @@ unsigned char hundreds = 0;
 unsigned char thousands = 0;
 
 static const unsigned char ZERO_CHAR = '0';
+static const unsigned char HIFEN_CHAR = '-';
 
 void convert_i_to_decimal(void)
 {
@@ -50,7 +51,6 @@ void convert_w_to_decimal(void)
     thousands = 0;
     while (w)
     {
-        
         if (w > 999)
         {
             w -= 1000;
@@ -58,7 +58,7 @@ void convert_w_to_decimal(void)
         }
         else if (w > 99)
         {
-            i -= 100;
+            w -= 100;
             hundreds++;
         }
         else if (w > 9)

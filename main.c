@@ -31,11 +31,6 @@
 unsigned char GameState = MENU;
 
 #define SCREEN_POS(x, y) (vram_adr(NTADR_A(x, y)))
-#define PRINT(t) (vram_write(t, sizeof(t)))
-#define PRINT_AT(x, y, t) \
-	SCREEN_POS(x, y);     \
-	PRINT(t);             \
-	SCREEN_POS(0, 0);
 
 #define blue_size_pt cards_size_ptr[0]
 #define green_size_pt cards_size_ptr[1]
@@ -65,10 +60,10 @@ void reset_game(void)
 {
 	cursor.card = NULL;
 	cursor.cell = 0;
-	table[0] = NULL;
-	table[1] = NULL;
-	table[2] = NULL;
-	table[3] = NULL;
+	(*table_ptr)[0] = NULL;
+	(*table_ptr)[1] = NULL;
+	(*table_ptr)[2] = NULL;
+	(*table_ptr)[3] = NULL;
 
 	red_size_pt = 0;
 	yellow_size_pt = 0;
@@ -81,7 +76,7 @@ void reset_game(void)
 	blue_bc_count = 3;
 	round = 13;
 	round_score = 0;
-
+	pp = 0;
 	shuffle_decks();
 }
 
@@ -90,17 +85,6 @@ void _update60(void)
 	// do nothing atm;
 	controller();
 	end_of_round();
-}
-
-void put_str(unsigned int adr, const char *str)
-{
-	vram_adr(adr);
-
-	while(1)
-	{
-		if(!*str) break;
-		vram_put((*str++)-0x20);//-0x20 because ASCII code 0x20 is placed in tile 0 of the CHR
-	}
 }
 
 /* End of turn
@@ -113,29 +97,37 @@ void put_str(unsigned int adr, const char *str)
 */
 void end_of_round(void) {
 	if (GameState != GAME || 
-		table[0] == NULL || 
-		table[1] == NULL || 
-		table[2] == NULL || 
-		table[3] == NULL)
+		(*table_ptr)[0] == NULL || 
+		(*table_ptr)[1]  == NULL || 
+		(*table_ptr)[2]  == NULL || 
+		(*table_ptr)[3]  == NULL)
 	{
 		return;
 	}
+	
+	pp = count_points();
 
-	w = count_points();
-	if (i > 0) {
-		round_score += w;
+	if (pp > 0) {
+		round_score += pp;
 		round--;
 	}
-	if (round == 0 || w < 0) {
+	
+	(*table_ptr)[0] = NULL;
+	(*table_ptr)[1] = NULL;
+	(*table_ptr)[2] = NULL;
+	(*table_ptr)[3] = NULL;
+
+	if (round == 0 || pp <= 0) {
 		GameState = ENDSCREEN;
 	}
+
 	if (cheat_num == CHEAT_RESET_ROUND) {
 		reset_game();
 		cheat_num = CHEAT_DISABLED;
 	}
 }
 
-int count_points(void) {
+signed int count_points(void) {
 	int val = 0;
 	int temp = 0;
 	for (i=0; i<4; i++) {
@@ -193,6 +185,20 @@ void instantiate_card_modifiers(struct Card * cards)
 		if (cards[i].Rmodifier != M_NONE) {
 			cards[i].Rmodifier = RANDOM_MODIFIER;
 		}
+	}
+}
+
+/* Uses I as argument, returns in variable temp_card */
+void get_card_on_deck(void)
+{
+	if (i == BLUE_CARD) {
+		temp_card = &blue_cards[BLUE_IDX];
+	} else if (i == GREEN_CARD) {
+		temp_card = &green_cards[GREEN_IDX];
+	} else if (i == YELLOW_CARD) {
+		temp_card = &yellow_cards[YELLOW_IDX];
+	} else if (i == RED_CARD) {
+		temp_card = &red_cards[RED_IDX];
 	}
 }
 
@@ -339,13 +345,11 @@ void controller_game(void)
 	if (BTN(PAD_LEFT))
 	{
 		cursor.cell = cursor.cell == 0 ? 3 : cursor.cell == 4 ? 7 : cursor.cell - 1;
-		// cursor.cell = cursor.cell-1 & 0x03;
 	}
 	if (BTN(PAD_RIGHT))
 	{
 		
         cursor.cell = cursor.cell == 3 ? 0 : cursor.cell == 7 ? 4 : cursor.cell + 1;
-		// cursor.cell = cursor.cell+1 & 0x03;
 	}
 	if (BTN(PAD_UP))
 	{
@@ -390,8 +394,19 @@ void _draw(void)
 	timer_draw();
 #endif
 
-	if (GameState == ENDSCREEN) {
-		print_scores();
+	switch (GameState) {
+		case MENU:
+			print_entry();
+			break;
+		case MENU_SETTINGS:
+			print_menu();
+			break;
+		case ENDSCREEN:
+			print_scores();
+			break;
+		case GAME:
+			print_table();
+			break;
 	}
 
 	//draw_card_piles();
@@ -401,15 +416,82 @@ void _draw(void)
 	clear_vram_buffer();
 }
 
-const unsigned char SCORE_TEXT [] = "SCORE:";
+void print_table(void)
+{
+	multi_vram_buffer_horz(GAME_TEXT, sizeof(GAME_TEXT), NTADR_A(10, 6));
+	for (j = 0; j < 8; j++) 
+	{
+		if (j > 3) 
+		{
+			n = j - 4;
+			if ((*table_ptr)[n] != NULL) {
+				i = (*table_ptr)[n]->id;
+				convert_i_to_decimal();
+			} else {
+				ones = HIFEN_CHAR;
+				tens = HIFEN_CHAR;
+			}
+			table_debug_text[3*n+2] = ones;
+			table_debug_text[3*n+1] = tens;
+			table_debug_text[3*n] = 
+						cursor.cell == j ? '*' : ' ';
+		} else {
+			i = j;
+			get_card_on_deck();
+			if (temp_card != NULL) {
+				i = temp_card->id;
+				convert_i_to_decimal();
+			} else {
+				ones = HIFEN_CHAR;
+				tens = HIFEN_CHAR;
+			}
+			deck_debug_text[3*j+2] = ones;
+			deck_debug_text[3*j+1] = tens;
+			deck_debug_text[3*j] = 
+					cursor.cell == j ? '*' : ' ';
+		}
+	}
+	
+	cursor_text[3] = ZERO_CHAR + cursor.cell;
+	
+	if (cursor.card != NULL) {
+		i = cursor.card->id;
+		convert_i_to_decimal();
+	} else {
+		ones = HIFEN_CHAR;
+		tens = HIFEN_CHAR;
+	}
+	cursor_text[11] = tens;
+	cursor_text[12] = ones;
+	
+	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(10, 8));
+	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(10, 10));
+	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(10, 20));
+
+}
+
+void print_entry(void)
+{
+	multi_vram_buffer_horz(ENTRY_TEXT, sizeof(ENTRY_TEXT), NTADR_A(10, 6));
+}
+
+void print_menu(void)
+{
+	multi_vram_buffer_horz(MENU_TEXT, sizeof(MENU_TEXT), NTADR_A(10, 6));
+}
 
 void print_scores(void) 
 {
 	multi_vram_buffer_horz(SCORE_TEXT, sizeof(SCORE_TEXT), NTADR_A(10, 6));
 	for (j = 0; j < 5; j++)
 	{
-		w = best_scores[j];
-		convert_w_to_decimal();
+		if (j == 0) {
+			i = round_score;
+		} else {
+			i = best_scores[j];
+		}
+
+		convert_i_to_decimal();
 		
 		score_text[0] = 'L' + j;
 		score_text[1] = 'S' + j;

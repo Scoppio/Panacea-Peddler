@@ -64,6 +64,22 @@
             },
             "group": "test",
             "problemMatcher": []
+        },
+        {
+            "label": "Run DEBUG",
+            "type": "shell",
+            "command": "fceux.exe",
+            "args": [
+                "-lua", "./test/application_test.lua", "./output/game.nes"
+            ],
+            "windows": {
+                "command": "C:\\Users\\scoppio\\Documents\\Projects\\NES\\Devkit\\fceux-2.2.3-win32\\fceux.exe",
+                "args": [
+                    "-lua", "C:\\Users\\scoppio\\Documents\\Projects\\NES\\Panacea-Peddler\\test\\debug_mode.lua", ".\\output\\game.nes"
+                ]
+            },
+            "group": "test",
+            "problemMatcher": []
         }
     ]
 }

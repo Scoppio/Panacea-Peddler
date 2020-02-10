@@ -25,6 +25,14 @@ card_colors[2] = "YELLOW"
 card_colors[3] = "RED"
 card_colors[5] = "BLACK"
 
+local function cardToString(card)
+    local txt = "[empty]"
+    if card then
+        txt = "Card [id="..card.id.." value="..card.value.." color="..card.color.." Lmodifier="..card.Lmodifier.." Rmodifier=]"
+    end
+    return txt
+end
+
 local function getCard(card_addr, verbose)
     local card = {}
     if card_addr > 0 then
@@ -54,7 +62,7 @@ local function readFlag(flagname, offset)
 end
 
 local function readCursor(verbose)
-    utils.wait(20)
+    -- utils.wait(20)
     local cursor = {}
     local hi, low = memory.readbyte(ram_table["_cursor"]+1),  memory.readbyte(ram_table["_cursor"])
     local card_addr = bit.bor(low, bit.lshift(hi,8))
@@ -183,6 +191,7 @@ M.readCardOnTable = readCardOnTable
 M.setFlag = setFlag
 M.readCardOnCell = readCardOnCell 
 M.readFlag = readFlag
+M.cardToString = cardToString
 
 memory.readWord = readWord
 

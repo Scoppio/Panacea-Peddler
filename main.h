@@ -1,8 +1,19 @@
 unsigned char pad1;
 unsigned char pad1_new;
-// static const unsigned char text[] = "Clock:"; // zero terminated c string
+
+// Texts
 unsigned char datetime[] = "00:00:00";
+
+const unsigned char ENTRY_TEXT [] = "Entry ";
+const unsigned char MENU_TEXT [] = "MENU  ";
+const unsigned char GAME_TEXT [] = "GAME  ";
+const unsigned char SCORE_TEXT [] = "SCORE:";
 unsigned char score_text[] = "abc - 9999";
+
+unsigned char table_debug_text [] = " 00 00 00 00";
+unsigned char deck_debug_text [] = " 00 00 00 00";
+unsigned char cursor_text [] = "c: 0 card: 00";
+
 
 unsigned int tick = 0;
 unsigned char second = 0;
@@ -11,26 +22,7 @@ unsigned char hour = 0;
 unsigned char counter = 60;
 static const unsigned char SIXTY = 60;
 
-void _clock_counter(void)
-{
-    tick++;
-    counter--;
-    if (counter == 0)
-    {
-        second++;
-        counter = SIXTY;
-        if (second == SIXTY)
-        {
-            minute++;
-            second = 0;
-            if (minute == SIXTY)
-            {
-                hour++;
-                minute = 0;
-            }
-        }
-    }
-}
+typedef unsigned char COLOR_;
 typedef unsigned char BYTE;
 
 struct SpObject
@@ -45,6 +37,7 @@ struct SpObject
 #define GREEN_CARD 1
 #define YELLOW_CARD 2
 #define RED_CARD 3
+
 #define BLACK_CARD 5
 #define DECK_CARDS_SIZE 13
 
@@ -79,6 +72,7 @@ unsigned char placed_on_table = NULL;
 static signed int best_scores[5] = {0, 0, 0, 0, 0};
 signed int round_score = 0;
 unsigned char round = 0;
+signed int pp = 0;
 
 unsigned char red_bc_count = 3;
 unsigned char yellow_bc_count = 3;
@@ -116,7 +110,7 @@ struct Card blue_cards[] = {
     {0x0C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card green_cards[] = {
-    {0x10, 1, GREEN_CARD, M_NONE, M_NONE},
+    {0x1E, 1, GREEN_CARD, M_NONE, M_NONE},
     {0x11, 1, GREEN_CARD, M_NONE, M_NONE},
     {0x12, 1, GREEN_CARD, M_NONE, M_NONE},
     {0x13, 1, GREEN_CARD, BLACK_CARD, M_NONE},
@@ -131,7 +125,7 @@ struct Card green_cards[] = {
     {0x1C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card yellow_cards[] = {
-    {0x20, 1, YELLOW_CARD, M_NONE, M_NONE},
+    {0x2E, 1, YELLOW_CARD, M_NONE, M_NONE},
     {0x21, 1, YELLOW_CARD, M_NONE, M_NONE},
     {0x22, 1, YELLOW_CARD, M_NONE, M_NONE},
     {0x23, 1, YELLOW_CARD, M_RANDOM, M_NONE},
@@ -146,7 +140,7 @@ struct Card yellow_cards[] = {
     {0x2C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card red_cards[] = {
-    {0x30, 1, RED_CARD, M_NONE, M_NONE},
+    {0x3E, 1, RED_CARD, M_NONE, M_NONE},
     {0x31, 1, RED_CARD, M_NONE, M_NONE},
     {0x32, 1, RED_CARD, M_NONE, M_NONE},
     {0x33, 1, RED_CARD, BLACK_CARD, M_NONE},
@@ -160,7 +154,7 @@ struct Card red_cards[] = {
     {0x3B, -3, BLACK_CARD, M_NONE, M_RANDOM},
     {0x3C, -1, BLACK_CARD, M_NONE, M_NONE}};
 
-struct Card temp_card;
+struct Card * temp_card;
 
 const unsigned char palette_bg[] = {
     BLACK, DARK_GREY, SILVER, WHITE,
@@ -186,12 +180,19 @@ void _game_loop(void);
 void _init(void);
 void _draw(void);
 void _update60(void);
+
 void reset_game(void);
+
 void draw_sprites(void);
 void draw_bg(void);
 void timer_draw(void);
-void print_debug(void);
-// void controller_update(void);
+void print_entry(void);
+void print_menu(void);
+void print_table(void);
+void print_scores(void);
+
+void get_card_on_deck(void);
+
 void controller(void);
 void controller_menu(void);
 void controller_menu_settings(void);
@@ -203,5 +204,26 @@ void shuffle(unsigned char (*array)[13]);
 void interact_with_table(void);
 void cancel_card(void);
 void end_of_round(void);
-int count_points(void);
-void print_scores(void); 
+signed int count_points(void);
+
+
+void _clock_counter(void)
+{
+    tick++;
+    counter--;
+    if (counter == 0)
+    {
+        second++;
+        counter = SIXTY;
+        if (second == SIXTY)
+        {
+            minute++;
+            second = 0;
+            if (minute == SIXTY)
+            {
+                hour++;
+                minute = 0;
+            }
+        }
+    }
+}
