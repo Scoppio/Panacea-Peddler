@@ -275,4 +275,4 @@ sounds_data:
 
 .segment "CHARS"
 
-	.incbin "assets/font/Alpha.chr"
+	.incbin "assets/tileset/tileset.chr"

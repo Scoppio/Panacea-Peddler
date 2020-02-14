@@ -13,8 +13,10 @@ unsigned char score_text[] = "abc - 9999";
 unsigned char table_debug_text [] = " 00 00 00 00";
 unsigned char deck_debug_text [] = " 00 00 00 00";
 unsigned char cursor_text [] = "c: 0 card: 00";
+unsigned char round_text [] = "000";
 
-
+unsigned char SLEEP = FALSE;
+unsigned int desired = 0;
 unsigned int tick = 0;
 unsigned char second = 0;
 unsigned char minute = 0;
@@ -157,29 +159,24 @@ struct Card red_cards[] = {
 struct Card * temp_card;
 
 const unsigned char palette_bg[] = {
-    BLACK, DARK_GREY, SILVER, WHITE,
-    0x0f, 0x01, 0x21, 0x39,
-    0x0f, 0x04, 0x24, 0x36,
-    0x0f, 0x09, 0x29, 0x38};
-
-const unsigned char palette_bg2[] = {
-    BLUE, OCHRE, YELLOW, RED,
-    0x0f, 0x01, 0x21, 0x39,
-    0x0f, 0x04, 0x24, 0x36,
-    0x0f, 0x09, 0x29, 0x38};
+    0x0f, 0x17, 0x28, 0x3c,
+    0x0f, 0x1c, 0x28, 0x39,
+    0x0f, 0x05, 0x15, 0x26,
+    0x0f, 0x09, 0x1a, 0x2a};
 
 const unsigned char palette_sp[] = {
-    BLACK, DARK_GREY, SILVER, WHITE,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0};
-
+    0x0f, 0x17, 0x28, 0x3c,
+    0x0f, 0x1c, 0x28, 0x39,
+    0x0f, 0x05, 0x15, 0x26,
+    0x0f, 0x09, 0x1a, 0x2a};
+    
 // PROTOTYPES
 void main(void);
 void _game_loop(void);
 void _init(void);
 void _draw(void);
 void _update60(void);
+void _cleanup(void);
 
 void reset_game(void);
 
@@ -205,7 +202,7 @@ void interact_with_table(void);
 void cancel_card(void);
 void end_of_round(void);
 signed int count_points(void);
-
+void sleep(BYTE byte);
 
 void _clock_counter(void)
 {

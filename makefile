@@ -23,11 +23,11 @@ DEPS = $(patsubst %,$(ODIR)/%,$(_DEPS))
 LABELS = $(patsubst %,$(ODIR)/%,$(_LABELS))
 
 ifeq (${OS},Windows_NT)
-		REMOVE = C:/cygwin64/bin/rm -f
+		REMOVE = rm
 		MKDIR_P = mkdir
 else
-        REMOVE = rm -f
-		MKDIR_P = mkdir -p
+        REMOVE = rm
+		MKDIR_P = mkdir 
 endif
 
 # process that creates the output folder if not present

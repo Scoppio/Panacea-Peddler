@@ -8,8 +8,12 @@
 
 #include "lib/sounds.h"
 #include "lib/registers.h"
+#include "assets/maps/gamescene_endscreen.h"
+#include "assets/maps/gamescene_menu.h"
+#include "assets/maps/gamescene_settings.h"
+#include "assets/maps/gamescene_game.h"
+
 #include "main.h"
-#include "sprites.h"
 #include "cheats.h"
 
 // there's some oddities in the palette code, black must be 0x0f, white must be 0x30
@@ -84,7 +88,6 @@ void _update60(void)
 {
 	// do nothing atm;
 	controller();
-	end_of_round();
 }
 
 /* End of turn
@@ -104,7 +107,7 @@ void end_of_round(void) {
 	{
 		return;
 	}
-	
+	sleep(30);
 	pp = count_points();
 
 	if (pp > 0) {
@@ -412,8 +415,14 @@ void _draw(void)
 	//draw_card_piles();
 	//draw_cards_table();
 
-	ppu_wait_nmi(); 
+	ppu_wait_nmi();
 	clear_vram_buffer();
+
+}
+
+void _cleanup(void)
+{
+	end_of_round();
 }
 
 void print_table(void)
@@ -434,7 +443,7 @@ void print_table(void)
 			table_debug_text[3*n+2] = ones;
 			table_debug_text[3*n+1] = tens;
 			table_debug_text[3*n] = 
-						cursor.cell == j ? '*' : ' ';
+						cursor.cell == j ? '>' : ' ';
 		} else {
 			i = j;
 			get_card_on_deck();
@@ -448,7 +457,7 @@ void print_table(void)
 			deck_debug_text[3*j+2] = ones;
 			deck_debug_text[3*j+1] = tens;
 			deck_debug_text[3*j] = 
-					cursor.cell == j ? '*' : ' ';
+					cursor.cell == j ? '>' : ' ';
 		}
 	}
 	
@@ -463,11 +472,18 @@ void print_table(void)
 	}
 	cursor_text[11] = tens;
 	cursor_text[12] = ones;
+
+	i = round_score;
+	convert_i_to_decimal();
+	
+	round_text[0] = thousands;
+	round_text[1] = tens;
+	round_text[2] = ones;
 	
 	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(10, 8));
 	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(10, 10));
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(10, 20));
-
+	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(28, 3));
 }
 
 void print_entry(void)
@@ -524,14 +540,16 @@ void timer_draw(void)
 	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(10,2));
 }
 
-void draw_sprites(void)
+void sleep(BYTE byte)
 {
-	// clear all sprites from sprite buffer
-	oam_clear();
-
-	// draw 2 metasprites
-	oam_meta_spr(28, 120, PaddleSpr);
-	oam_meta_spr(47, 97, BallSpr);
+	if (byte > 60) {
+		byte = 60;
+	}
+	desired = tick + byte;
+    for (;desired > tick;) {
+        _clock_counter();
+        ppu_wait_nmi();
+    }
 }
 
 void main(void)
@@ -547,5 +565,6 @@ void _game_loop(void)
 		_clock_counter();
 		_update60();
 		_draw();
+		_cleanup();
 	}
 }
