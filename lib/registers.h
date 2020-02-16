@@ -10,6 +10,9 @@ unsigned char tens = 0;
 unsigned char hundreds = 0;
 unsigned char thousands = 0;
 
+unsigned int address = 0;
+unsigned char index = 0;
+
 static const unsigned char ZERO_CHAR = '0';
 static const unsigned char HIFEN_CHAR = '-';
 

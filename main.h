@@ -46,6 +46,11 @@ struct SpObject
 #define M_RANDOM 4
 #define M_NONE 12
 
+#define ENTRY_DRAWN 1
+#define END_SCREEN_DRAWN 2
+#define MENU_DRAWN 4
+#define GAME_DRAWN 8
+
 struct Card
 {
     unsigned char id;
@@ -75,6 +80,8 @@ static signed int best_scores[5] = {0, 0, 0, 0, 0};
 signed int round_score = 0;
 unsigned char round = 0;
 signed int pp = 0;
+
+unsigned char map_registers = 0x00;
 
 unsigned char red_bc_count = 3;
 unsigned char yellow_bc_count = 3;
@@ -187,6 +194,8 @@ void print_entry(void);
 void print_menu(void);
 void print_table(void);
 void print_scores(void);
+void load_room(void);
+void update_game_bg(void);
 
 void get_card_on_deck(void);
 
