@@ -12,7 +12,7 @@ import os
 
 
 filename = sys.argv[1]
-newname = filename[0:-4] + ".c"
+newname = filename[0:-4] + ".h"
 newname2 = os.path.basename(filename)
 newname2 = newname2[0:-4]
 

@@ -8,15 +8,7 @@
 
 #include "lib/sounds.h"
 #include "lib/registers.h"
-#include "assets/maps/gamescene_endscreen.h"
-#include "assets/maps/gamescene_menu.h"
-#include "assets/maps/gamescene_settings.h"
-#include "assets/maps/gamescene_game.h"
-#include "assets/maps/gamescene_endscreen_mt.h"
-#include "assets/maps/gamescene_menu_mt.h"
-#include "assets/maps/gamescene_settings_mt.h"
-#include "assets/maps/gamescene_game_mt.h"
-#include "assets/tileset/metatiles_1.h"
+#include "assets/maps/gamescene.h"
 
 #include "main.h"
 #include "cheats.h"
@@ -25,7 +17,7 @@
 
 #pragma bss - name(push, "ZEROPAGE")
 
-#define DEBUG
+// #define DEBUG
 
 // Game states
 #define MENU 0
@@ -433,7 +425,7 @@ void _cleanup(void)
 void print_table(void)
 {
 	
-	if (!map_registers & GAME_DRAWN) {
+	if (map_registers != GAME_DRAWN) {
 		// multi_vram_buffer_horz(GAME_TEXT, sizeof(GAME_TEXT), NTADR_A(10, 6));
 		load_room();
 	}
@@ -494,28 +486,27 @@ void print_table(void)
 	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(10, 10));
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(10, 20));
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(28, 3));
-	update_game_bg();
 }
 
 void print_entry(void)
 {
-	if (!map_registers & ENTRY_DRAWN) {
+	if (map_registers != ENTRY_DRAWN) {
 		load_room();
-		multi_vram_buffer_horz(ENTRY_TEXT, sizeof(ENTRY_TEXT), NTADR_A(10, 6));
+		// multi_vram_buffer_horz(ENTRY_TEXT, sizeof(ENTRY_TEXT), NTADR_A(10, 6));
 	}
 }
 
 void print_menu(void)
 {
-	if (!map_registers & MENU_DRAWN) {
+	if (map_registers != MENU_DRAWN) {
 		load_room();
-		multi_vram_buffer_horz(MENU_TEXT, sizeof(MENU_TEXT), NTADR_A(10, 6));
+		// multi_vram_buffer_horz(MENU_TEXT, sizeof(MENU_TEXT), NTADR_A(10, 6));
 	}
 }
 
 void print_scores(void) 
 {
-	if (!map_registers & END_SCREEN_DRAWN) {
+	if (!map_registers != END_SCREEN_DRAWN) {
 		load_room();
 		multi_vram_buffer_horz(SCORE_TEXT, sizeof(SCORE_TEXT), NTADR_A(10, 6));
 		for (j = 0; j < 5; j++)
@@ -546,25 +537,23 @@ void load_room() {
 	switch (GameState)
 	{
 	case GAME:
-		set_data_pointer(gamescene_game);
-		set_mt_pointer(gamescene_game_mt);
+		set_data_pointer(room_game);
+		set_mt_pointer(room_game_mt);
 		map_registers = GAME_DRAWN;
 		break;
 	case ENDSCREEN:
-		set_data_pointer(gamescene_endscreen);
-		set_mt_pointer(gamescene_endscreen_mt);
+		set_data_pointer(room_endscreen);
+		set_mt_pointer(room_endscreen_mt);
 		map_registers = ENTRY_DRAWN;
 		break;
 	case MENU:
-		set_data_pointer(gamescene_menu);
-		set_mt_pointer(gamescene_menu_mt);
+		set_data_pointer(room_menu);
+		set_mt_pointer(room_menu_mt);
 		map_registers = ENTRY_DRAWN;
 		break;
 	case MENU_SETTINGS:
-		// set_data_pointer(gamescene_settings);
-		set_data_pointer(gamescene_game);
-		set_mt_pointer(gamescene_game_mt);
-		
+		set_data_pointer(room_settings);
+		set_mt_pointer(room_settings_mt);
 		map_registers = MENU_DRAWN;
 		break;
 	default:
@@ -582,8 +571,9 @@ void load_room() {
 		}
 		if (i == 0xe0) break;
 	}
-	
-	// set_vram_update(NULL); // just turn ppu updates OFF for this example
+	set_scroll_y(0xff);
+	clear_vram_buffer(); 
+	//set_vram_update(NULL); // just turn ppu updates OFF for this example
 }
 
 void timer_draw(void)

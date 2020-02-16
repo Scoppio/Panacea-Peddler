@@ -19,15 +19,18 @@ ODIR=output
 _LABELS = game.labels.txt
 EXTRAS = -m $(patsubst %,$(ODIR)/%, game.map.txt) --dbgfile $(patsubst %,$(ODIR)/%, game.nes.dbg)
 
+_ASSETS_MAPS = assets
+ASSETS_MAPS = $(patsubst %, $(_ASSETS_MAPS)/%, maps)
+
 DEPS = $(patsubst %,$(ODIR)/%,$(_DEPS))
 LABELS = $(patsubst %,$(ODIR)/%,$(_LABELS))
 
+MKDIR_P = mkdir 
+
 ifeq (${OS},Windows_NT)
-		REMOVE = rm
-		MKDIR_P = mkdir
+		REMOVE = del /Q
 else
         REMOVE = rm
-		MKDIR_P = mkdir 
 endif
 
 # process that creates the output folder if not present
@@ -56,12 +59,19 @@ $(ODIR)/%.o: $(ODIR)/%.s
 # Create game
 game.nes: $(DEPS)
 	$(LD) $(LDFLAGS) -o $(ODIR)/$@ $^ $(BUILD_FILES) $(LABELS) $(EXTRAS)
-	python scripts/fceux_symbols.py $(ODIR)/game.labels.txt
+	python scripts/fceux_symbols.py $(ODIR)/game.labels.txt 
+
+.PHONY: maps
+
+# Build process - tmx to h files
+$(ASSETS_MAPS)/%.h: $(ASSETS_MAPS)/%.tmx
+	python scripts/convert_tiledxml_2_gamefile.py $^ > $@
+	@echo Making $<
+
+maps: $(patsubst %.tmx,%.h,$(wildcard $(ASSETS_MAPS)/*.tmx))
+	@echo $@ $^
 
 .PHONY: clean
 
 clean:
-	$(REMOVE) $(ODIR)/*
-
-clean-misc:
-	$(REMOVE) $(ODIR)/*.o $(ODIR)/*.s $(ODIR)/*.txt $(ODIR)/*.dbg $(ODIR)/*.deb
+	$(REMOVE) $(ODIR)

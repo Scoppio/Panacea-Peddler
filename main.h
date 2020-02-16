@@ -195,7 +195,6 @@ void print_menu(void);
 void print_table(void);
 void print_scores(void);
 void load_room(void);
-void update_game_bg(void);
 
 void get_card_on_deck(void);
 

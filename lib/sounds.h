@@ -7,3 +7,4 @@
 #define snd_ACTION_CURSOR 5
 
 void play_sound(unsigned char nmr) {}
+
