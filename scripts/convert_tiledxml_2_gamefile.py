@@ -14,10 +14,10 @@ import xml.etree.ElementTree as et
 class Metatile(object):
 
     def __init__(self, tl, tr, bl, br, pal):
-        self.tl = tl
-        self.tr = tr
-        self.bl = bl
-        self.br = br
+        self.tl = tl-1
+        self.tr = tr-1
+        self.bl = bl-1
+        self.br = br-1
         self.pal = pal
 
     def __eq__(self, other):
@@ -31,7 +31,7 @@ class Metatile(object):
         return ",".join([str(self.tl), str(self.tr), str(self.bl), str(self.br), str(self.pal)])
 
     def __hash__(self):
-        return hash(self.tl) + hash(self.tr) + hash(self.bl) + hash(self.br) + hash(self.pal)
+        return self.tl*10000+self.tr*1000+self.bl*100+self.br*10+self.pal
 
     def __repr__(self):
         return self.__str__()
@@ -50,7 +50,7 @@ class MetatileSet(object):
         return self.hashtable[hash(metatile)][0]
 
     def __contains__(self, item):
-        return hash(item) in self.hashtable.keys()
+        return hash(item) in self.hashtable
 
     def __str__(self):
         return "\n".join([str(i) for i in self.metatiles])
@@ -80,22 +80,23 @@ def make_metatiles_and_room(matrix):
     columns = int(len(matrix[0]))
     metatileset = MetatileSet()
     room = []
-    try:
-        for line in range(0, rows, 2):
-            roomline = []
-            for col in range(0, columns, 2):
+
+    for line in range(0, rows, 2):
+        roomline = []
+        for col in range(0, columns, 2):
+            try:
                 tl = int(matrix[line][col])
-                tr = int(matrix[line + 1][col])
-                bl = int(matrix[line][col + 1])
+                tr = int(matrix[line][col + 1])
+                bl = int(matrix[line + 1][col])
                 br = int(matrix[line + 1][col + 1])
-                pal = 0
                 m = Metatile(tl, tr, bl, br, 0)
                 idx = metatileset + m
                 roomline.append(idx)
-            room.append(roomline)
-    except Exception as e:
-        print(name, e, line, col, rows, columns, len(matrix), len(matrix[0]))
-        exit(1)
+            except Exception as e:
+                print(name, e, line, col, rows, columns, len(matrix), len(matrix[0]))
+                exit(1)
+        room.append(roomline)
+
     return metatileset, room
 
 

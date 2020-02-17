@@ -17,7 +17,7 @@
 
 #pragma bss - name(push, "ZEROPAGE")
 
-// #define DEBUG
+#define DEBUG
 
 // Game states
 #define MENU 0
@@ -65,12 +65,10 @@ void reset_game(void)
 	(*table_ptr)[1] = NULL;
 	(*table_ptr)[2] = NULL;
 	(*table_ptr)[3] = NULL;
-
 	red_size_pt = 0;
 	yellow_size_pt = 0;
 	green_size_pt = 0;
 	blue_size_pt = 0;
-
 	red_bc_count = 3;
 	yellow_bc_count = 3;
 	green_bc_count = 3;
@@ -78,6 +76,7 @@ void reset_game(void)
 	round = 13;
 	round_score = 0;
 	pp = 0;
+	second_forever = 0;
 	shuffle_decks();
 }
 
@@ -426,10 +425,9 @@ void print_table(void)
 {
 	
 	if (map_registers != GAME_DRAWN) {
-		// multi_vram_buffer_horz(GAME_TEXT, sizeof(GAME_TEXT), NTADR_A(10, 6));
 		load_room();
 	}
-
+#ifdef DEBUG
 	for (j = 0; j < 8; j++) 
 	{
 		if (j > 3) 
@@ -458,8 +456,7 @@ void print_table(void)
 			}
 			deck_debug_text[3*j+2] = ones;
 			deck_debug_text[3*j+1] = tens;
-			deck_debug_text[3*j] = 
-					cursor.cell == j ? '>' : ' ';
+			deck_debug_text[3*j] = cursor.cell == j ? '>' : ' ';
 		}
 	}
 	
@@ -475,24 +472,53 @@ void print_table(void)
 	cursor_text[11] = tens;
 	cursor_text[12] = ones;
 
+	
+	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(16, 8));
+	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(16, 10));
+	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(16, 12));
+#endif
+
+	i = pp;
+	convert_i_to_decimal();
+	
+	round_text[0] = thousands;
+	round_text[1] = tens;
+	round_text[2] = ones;
+	// round score
+	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 3));
+	
 	i = round_score;
 	convert_i_to_decimal();
 	
 	round_text[0] = thousands;
 	round_text[1] = tens;
 	round_text[2] = ones;
+	// total score
+	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 2));
+
+	 w = second_forever;
+	 convert_w_to_decimal();
 	
-	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(10, 8));
-	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(10, 10));
-	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(10, 20));
-	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(28, 3));
+	round_text[0] = thousands;
+	round_text[1] = tens;
+	round_text[2] = ones;
+	// seconds
+	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 2));
+	
+	i = round;
+	
+	convert_i_to_decimal();
+	
+	round_text[0] = thousands;
+	round_text[1] = tens;
+	round_text[2] = ones;
+	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 3));
 }
 
 void print_entry(void)
 {
 	if (map_registers != ENTRY_DRAWN) {
 		load_room();
-		// multi_vram_buffer_horz(ENTRY_TEXT, sizeof(ENTRY_TEXT), NTADR_A(10, 6));
 	}
 }
 
@@ -500,15 +526,14 @@ void print_menu(void)
 {
 	if (map_registers != MENU_DRAWN) {
 		load_room();
-		// multi_vram_buffer_horz(MENU_TEXT, sizeof(MENU_TEXT), NTADR_A(10, 6));
 	}
 }
 
 void print_scores(void) 
 {
-	if (!map_registers != END_SCREEN_DRAWN) {
+	if (map_registers != END_SCREEN_DRAWN) {
 		load_room();
-		multi_vram_buffer_horz(SCORE_TEXT, sizeof(SCORE_TEXT), NTADR_A(10, 6));
+		
 		for (j = 0; j < 5; j++)
 		{
 			if (j == 0) {
@@ -544,7 +569,7 @@ void load_room() {
 	case ENDSCREEN:
 		set_data_pointer(room_endscreen);
 		set_mt_pointer(room_endscreen_mt);
-		map_registers = ENTRY_DRAWN;
+		map_registers = END_SCREEN_DRAWN;
 		break;
 	case MENU:
 		set_data_pointer(room_menu);
@@ -559,7 +584,7 @@ void load_room() {
 	default:
 		break;
 	}
-
+	ppu_off();
 	for(i=0; ;i+=0x20){
 		for(j=0; ;j+=0x20){
 			clear_vram_buffer(); // do each frame, and before putting anything in the buffer
@@ -573,6 +598,7 @@ void load_room() {
 	}
 	set_scroll_y(0xff);
 	clear_vram_buffer(); 
+	ppu_on_all();
 	//set_vram_update(NULL); // just turn ppu updates OFF for this example
 }
 
@@ -592,7 +618,7 @@ void timer_draw(void)
 	datetime[1] = ones;
 	datetime[0] = tens;
 
-	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(10,2));
+	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(10,1));
 }
 
 void sleep(BYTE byte)

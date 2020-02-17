@@ -8,17 +8,18 @@ const unsigned char ENTRY_TEXT [] = "Entry ";
 const unsigned char MENU_TEXT [] = "MENU  ";
 const unsigned char GAME_TEXT [] = "GAME  ";
 const unsigned char SCORE_TEXT [] = "SCORE:";
-unsigned char score_text[] = "abc - 9999";
+unsigned char score_text[] = "ABC - 9999";
 
 unsigned char table_debug_text [] = " 00 00 00 00";
 unsigned char deck_debug_text [] = " 00 00 00 00";
-unsigned char cursor_text [] = "c: 0 card: 00";
+unsigned char cursor_text [] = "C: 0 C-ID: 00";
 unsigned char round_text [] = "000";
 
 unsigned char SLEEP = FALSE;
 unsigned int desired = 0;
 unsigned int tick = 0;
 unsigned char second = 0;
+unsigned int second_forever = 0;
 unsigned char minute = 0;
 unsigned char hour = 0;
 unsigned char counter = 60;
@@ -219,6 +220,7 @@ void _clock_counter(void)
     if (counter == 0)
     {
         second++;
+        second_forever++;
         counter = SIXTY;
         if (second == SIXTY)
         {
