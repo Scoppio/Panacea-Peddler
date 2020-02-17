@@ -212,6 +212,7 @@ void cancel_card(void);
 void end_of_round(void);
 signed int count_points(void);
 void sleep(BYTE byte);
+void update_cards_on_table(void);
 
 void _clock_counter(void)
 {

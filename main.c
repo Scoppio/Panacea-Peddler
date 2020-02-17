@@ -124,6 +124,8 @@ void end_of_round(void) {
 		reset_game();
 		cheat_num = CHEAT_DISABLED;
 	}
+
+	map_registers = NULL;
 }
 
 signed int count_points(void) {
@@ -442,8 +444,7 @@ void print_table(void)
 			}
 			table_debug_text[3*n+2] = ones;
 			table_debug_text[3*n+1] = tens;
-			table_debug_text[3*n] = 
-						cursor.cell == j ? '>' : ' ';
+			table_debug_text[3*n] = cursor.cell == j ? '>' : ' ';
 		} else {
 			i = j;
 			get_card_on_deck();
@@ -496,8 +497,8 @@ void print_table(void)
 	// total score
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 2));
 
-	 w = second_forever;
-	 convert_w_to_decimal();
+	w = second_forever;
+	convert_w_to_decimal();
 	
 	round_text[0] = thousands;
 	round_text[1] = tens;
@@ -513,6 +514,55 @@ void print_table(void)
 	round_text[1] = tens;
 	round_text[2] = ones;
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 3));
+
+	update_cards_on_table();
+}
+
+void update_cards_on_table(void)
+{
+	ppu_off();
+	
+	// card (x6 y22 -> x9 y27 (x8 y23))
+	// update cursor card  = 
+		// (6 22 9 27 (8 23))
+
+	// update table cards = 
+		// (14 14 17 19 (16 15)) 
+		// (18 14 21 19 (20 15)) 
+		// (22 14 25 19 (24 15)) 
+		// (22 14 29 19 (28 15))
+
+	// update deck card = 
+		// (14 22 17 27 (16 23)) 
+		// (18 22 21 27 (20 23)) 
+		// (22 22 25 27 (24 23)) 
+		// (22 22 29 27 (28 23))
+
+	// position challenge symbols
+
+
+	for(i=0; ;i+=0x20){
+		for(j=0; ;j+=0x20){
+			clear_vram_buffer(); // do each frame, and before putting anything in the buffer
+			address = get_ppu_addr(0, j, i);
+			index = (i & 0xf0) + (j >> 4);
+			buffer_4_mt(address, index); // ppu_address, index to the data
+			
+			address = get_at_addr(0,j,i);
+			vram_adr(address); // nametable A's attribute table 23c0-23ff
+			vram_fill(0, 8); // 8 bytes of 00 00 00 00
+			vram_fill(0x55, 8); // 8 bytes of 01 01 01 01
+			vram_fill(0xAA, 8); // 8 bytes of 10 10 10 10
+			vram_fill(0xFF, 8); // 8 bytes of 11 11 11 11
+			
+			flush_vram_update_nmi();
+			if (j == 0xe0) break;
+		}
+		if (i == 0xe0) break;
+	}
+	set_scroll_y(0xff);
+	clear_vram_buffer(); 
+	ppu_on_all();
 }
 
 void print_entry(void)
@@ -599,7 +649,6 @@ void load_room() {
 	set_scroll_y(0xff);
 	clear_vram_buffer(); 
 	ppu_on_all();
-	//set_vram_update(NULL); // just turn ppu updates OFF for this example
 }
 
 void timer_draw(void)
