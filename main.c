@@ -9,6 +9,7 @@
 #include "lib/sounds.h"
 #include "lib/registers.h"
 #include "assets/maps/gamescene.h"
+#include "assets/maps/gamecards.h"
 
 #include "main.h"
 #include "cheats.h"
@@ -53,7 +54,7 @@ void _init(void)
 	pal_spr(palette_sp); // load the Sprite palette
 	ppu_on_all();		 //	turn on screen
 	set_vram_buffer();	 // PPU pointed to VRAM Buffer
-	bank_spr(1);		 // set bank for sprite
+	bank_spr(0);		 // set bank for sprite
 	reset_game();		 // reset game variables
 }
 
@@ -77,6 +78,8 @@ void reset_game(void)
 	round_score = 0;
 	pp = 0;
 	second_forever = 0;
+	map_registers = NULL;
+	oam_clear();
 	shuffle_decks();
 }
 
@@ -125,7 +128,7 @@ void end_of_round(void) {
 		cheat_num = CHEAT_DISABLED;
 	}
 
-	map_registers = NULL;
+	// map_registers = NULL;
 }
 
 signed int count_points(void) {
@@ -133,6 +136,8 @@ signed int count_points(void) {
 	int temp = 0;
 	for (i=0; i<4; i++) {
 		temp = (*table_ptr)[i]->value;
+		if ((*table_ptr)[i]->sign == NEGATIVE) temp = -temp;
+
 		if (i > 0) {
 			if ((*table_ptr)[i]->Lmodifier == (*table_ptr)[i-1]->color) {
 				val+=temp;
@@ -151,6 +156,7 @@ signed int count_points(void) {
 
 void shuffle_decks(void)
 {
+	set_rand(tick);
 	shuffle(&red_idx);
 	shuffle(&blue_idx);
 	shuffle(&green_idx);
@@ -163,7 +169,6 @@ void shuffle_decks(void)
 
 void shuffle(unsigned char (*array)[13])
 {
-	set_rand(tick);
 	for (i = 0; i < DECK_CARDS_SIZE; i++)
 	{
 		do
@@ -349,7 +354,6 @@ void controller_game(void)
 	}
 	if (BTN(PAD_RIGHT))
 	{
-		
         cursor.cell = cursor.cell == 3 ? 0 : cursor.cell == 7 ? 4 : cursor.cell + 1;
 	}
 	if (BTN(PAD_UP))
@@ -478,7 +482,12 @@ void print_table(void)
 	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(16, 10));
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(16, 12));
 #endif
+	update_score_header();
+	update_cards_on_table();
+}
 
+void update_score_header(void)
+{
 	i = pp;
 	convert_i_to_decimal();
 	
@@ -514,14 +523,66 @@ void print_table(void)
 	round_text[1] = tens;
 	round_text[2] = ones;
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 3));
-
-	update_cards_on_table();
 }
 
 void update_cards_on_table(void)
 {
-	ppu_off();
-	
+	// ppu_off();
+	oam_clear();
+	// print card cost
+	temp_card = &blue_cards[BLUE_IDX];
+	if (temp_card->sign == NEGATIVE) {
+		oam_spr(14<<3, 23<<3, 45, 0);
+	}
+	oam_spr(15<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
+	if (temp_card->Lmodifier != M_NONE) {
+		oam_spr(12<<3, 26<<3, 243, temp_card->Lmodifier);
+	}
+	if (temp_card->Rmodifier != M_NONE) {
+		oam_spr(15<<3, 26<<3, 244, temp_card->Rmodifier);
+	}
+	temp_card = &green_cards[GREEN_IDX];
+	if (temp_card->sign == NEGATIVE) {
+		oam_spr(17<<3, 23<<3, 45, 0);
+	}
+	oam_spr(18<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
+	if (temp_card->Lmodifier != M_NONE) {
+		oam_spr(16<<3, 26<<3, 243, temp_card->Lmodifier);
+	}
+	if (temp_card->Rmodifier != M_NONE) {
+		oam_spr(19<<3, 26<<3, 244, temp_card->Rmodifier);
+	}
+
+	temp_card = &yellow_cards[YELLOW_IDX];
+	if (temp_card->sign == NEGATIVE) {
+		oam_spr(21<<3, 23<<3, 45, 0);
+	}
+	oam_spr(22<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
+	if (temp_card->Lmodifier != M_NONE) {
+		oam_spr(20<<3, 26<<3, 243, 0);
+	}
+	if (temp_card->Rmodifier != M_NONE) {
+		oam_spr(23<<3, 26<<3, 244, temp_card->Rmodifier);
+	}
+	temp_card = &red_cards[RED_IDX];
+	if (temp_card->sign == NEGATIVE) {
+		oam_spr(25<<3, 23<<3, 45, 0);
+	}
+	oam_spr(26<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
+	if (temp_card->Lmodifier != M_NONE) {
+		oam_spr(24<<3, 26<<3, 243, temp_card->Lmodifier);
+	}
+	if (temp_card->Rmodifier != M_NONE) {
+		oam_spr(27<<3, 26<<3, 244, temp_card->Rmodifier);
+	}
+	// 76543210
+	// ||||||||
+	// ||||||++- Palette (4 to 7) of sprite
+	// |||+++--- Unimplemented
+	// ||+------ Priority (0: in front of background; 1: behind background)
+	// |+------- Flip sprite horizontally
+	// +-------- Flip sprite vertically
+
 	// card (x6 y22 -> x9 y27 (x8 y23))
 	// update cursor card  = 
 		// (6 22 9 27 (8 23))
@@ -541,28 +602,28 @@ void update_cards_on_table(void)
 	// position challenge symbols
 
 
-	for(i=0; ;i+=0x20){
-		for(j=0; ;j+=0x20){
-			clear_vram_buffer(); // do each frame, and before putting anything in the buffer
-			address = get_ppu_addr(0, j, i);
-			index = (i & 0xf0) + (j >> 4);
-			buffer_4_mt(address, index); // ppu_address, index to the data
+	// for(i=0; ;i+=0x20){
+	// 	for(j=0; ;j+=0x20){
+	// 		clear_vram_buffer(); // do each frame, and before putting anything in the buffer
+	// 		address = get_ppu_addr(0, j, i);
+	// 		index = (i & 0xf0) + (j >> 4);
+	// 		buffer_4_mt(address, index); // ppu_address, index to the data
 			
-			address = get_at_addr(0,j,i);
-			vram_adr(address); // nametable A's attribute table 23c0-23ff
-			vram_fill(0, 8); // 8 bytes of 00 00 00 00
-			vram_fill(0x55, 8); // 8 bytes of 01 01 01 01
-			vram_fill(0xAA, 8); // 8 bytes of 10 10 10 10
-			vram_fill(0xFF, 8); // 8 bytes of 11 11 11 11
+	// 		address = get_at_addr(0,j,i);
+	// 		vram_adr(address); // nametable A's attribute table 23c0-23ff
+	// 		vram_fill(0, 8); // 8 bytes of 00 00 00 00
+	// 		vram_fill(0x55, 8); // 8 bytes of 01 01 01 01
+	// 		vram_fill(0xAA, 8); // 8 bytes of 10 10 10 10
+	// 		vram_fill(0xFF, 8); // 8 bytes of 11 11 11 11
 			
-			flush_vram_update_nmi();
-			if (j == 0xe0) break;
-		}
-		if (i == 0xe0) break;
-	}
-	set_scroll_y(0xff);
-	clear_vram_buffer(); 
-	ppu_on_all();
+	// 		flush_vram_update_nmi();
+	// 		if (j == 0xe0) break;
+	// 	}
+	// 	if (i == 0xe0) break;
+	// }
+	// set_scroll_y(0xff);
+	// clear_vram_buffer(); 
+	// ppu_on_all();
 }
 
 void print_entry(void)
@@ -645,6 +706,19 @@ void load_room() {
 			if (j == 0xe0) break;
 		}
 		if (i == 0xe0) break;
+	}
+	
+	if (map_registers == GAME_DRAWN) {
+		n = 0;
+		for (i = 12; i < 25; i+=4) {
+			address = get_at_addr(0, i<<3, 22<<3);
+			vram_adr(address); // pick a random attribute byte on the lower half
+			vram_put(card_palete[n]);
+			address = get_at_addr(0, i<<3, 26<<3);
+			vram_adr(address); // pick a random attribute byte on the lower half
+			vram_put(card_palete[n]);
+			n++;
+		}
 	}
 	set_scroll_y(0xff);
 	clear_vram_buffer(); 
