@@ -58,7 +58,7 @@ struct SpObject
 struct Card
 {
     unsigned char id;
-    unsigned char value;
+    signed char value;
     unsigned char sign;
     unsigned char color;
     unsigned char Lmodifier;
@@ -84,7 +84,7 @@ unsigned char placed_on_table = NULL;
 static signed int best_scores[5] = {0, 0, 0, 0, 0};
 signed int round_score = 0;
 unsigned char round = 0;
-signed int pp = 0;
+signed char pp = 0;
 
 unsigned char map_registers = 0x00;
 
@@ -112,31 +112,31 @@ struct Card blue_cards[] = {
     {0x0E, 1, POSITIVE, BLUE_CARD, M_NONE, M_NONE},
     {0x01, 1, POSITIVE, BLUE_CARD, M_NONE, M_NONE},
     {0x02, 1, POSITIVE, BLUE_CARD, M_NONE, M_NONE},
-    {0x03, 1, POSITIVE, BLUE_CARD, BLUE_CARD, M_NONE},
-    {0x04, 1, POSITIVE, BLUE_CARD, GREEN_CARD, M_NONE},
-    {0x05, 1, POSITIVE, BLUE_CARD, M_NONE, BLACK_CARD},
-    {0x06, 1, POSITIVE, BLUE_CARD, M_NONE, YELLOW_CARD},
-    {0x07, 1, POSITIVE, BLUE_CARD, M_NONE, GREEN_CARD},
-    {0x08, 1, POSITIVE, BLUE_CARD, BLUE_CARD, YELLOW_CARD},
-    {0x09, 1, POSITIVE, BLUE_CARD, YELLOW_CARD, YELLOW_CARD},
-    {0x0A, 2, NEGATIVE, BLACK_CARD, RED_CARD, M_NONE},
-    {0x0B, 3, NEGATIVE, BLACK_CARD, M_NONE, GREEN_CARD},
-    {0x0C, 1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
+    {0x03, 1, POSITIVE, BLUE_CARD, M_RANDOM, M_NONE},
+    {0x04, 1, POSITIVE, BLUE_CARD, M_RANDOM, M_NONE},
+    {0x05, 1, POSITIVE, BLUE_CARD, M_NONE, M_RANDOM},
+    {0x06, 1, POSITIVE, BLUE_CARD, M_NONE, M_RANDOM},
+    {0x07, 1, POSITIVE, BLUE_CARD, M_NONE, M_RANDOM},
+    {0x08, 1, POSITIVE, BLUE_CARD, M_RANDOM, M_RANDOM},
+    {0x09, 1, POSITIVE, BLUE_CARD, M_RANDOM, M_RANDOM},
+    {0x0A, -2, NEGATIVE, BLACK_CARD, RED_CARD, M_NONE},
+    {0x0B, -1, NEGATIVE, BLACK_CARD, M_NONE, M_RANDOM},
+    {0x0C, -1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card green_cards[] = {
     {0x1E, 1, POSITIVE, GREEN_CARD, M_NONE, M_NONE},
     {0x11, 1, POSITIVE, GREEN_CARD, M_NONE, M_NONE},
     {0x12, 1, POSITIVE, GREEN_CARD, M_NONE, M_NONE},
-    {0x13, 1, POSITIVE, GREEN_CARD, BLACK_CARD, M_NONE},
-    {0x14, 1, POSITIVE, GREEN_CARD, YELLOW_CARD, M_NONE},
-    {0x15, 1, POSITIVE, GREEN_CARD, M_NONE, RED_CARD},
-    {0x16, 1, POSITIVE, GREEN_CARD, M_NONE, RED_CARD},
-    {0x17, 1, POSITIVE, GREEN_CARD, M_NONE, BLUE_CARD},
-    {0x18, 1, POSITIVE, GREEN_CARD, BLUE_CARD, BLUE_CARD},
-    {0x19, 1, POSITIVE, GREEN_CARD, GREEN_CARD, YELLOW_CARD},
-    {0x1A, 2, NEGATIVE, BLACK_CARD, RED_CARD, M_NONE},
-    {0x1B, 3, NEGATIVE, BLACK_CARD, M_NONE, GREEN_CARD},
-    {0x1C, 1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
+    {0x13, 1, POSITIVE, GREEN_CARD, M_RANDOM, M_NONE},
+    {0x14, 1, POSITIVE, GREEN_CARD, M_RANDOM, M_NONE},
+    {0x15, 1, POSITIVE, GREEN_CARD, M_NONE, M_RANDOM},
+    {0x16, 1, POSITIVE, GREEN_CARD, M_NONE, M_RANDOM},
+    {0x17, 1, POSITIVE, GREEN_CARD, M_NONE, M_RANDOM},
+    {0x18, 1, POSITIVE, GREEN_CARD, M_RANDOM, M_RANDOM},
+    {0x19, 1, POSITIVE, GREEN_CARD, M_RANDOM, M_RANDOM},
+    {0x1A, -2, NEGATIVE, BLACK_CARD, M_RANDOM, M_NONE},
+    {0x1B, -1, NEGATIVE, BLACK_CARD, M_NONE, M_RANDOM},
+    {0x1C, -1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card yellow_cards[] = {
     {0x2E, 1, POSITIVE, YELLOW_CARD, M_NONE, M_NONE},
@@ -147,26 +147,26 @@ struct Card yellow_cards[] = {
     {0x25, 1, POSITIVE, YELLOW_CARD, M_NONE, M_RANDOM},
     {0x26, 1, POSITIVE, YELLOW_CARD, M_NONE, M_RANDOM},
     {0x27, 1, POSITIVE, YELLOW_CARD, M_NONE, M_RANDOM},
-    {0x28, 1, POSITIVE, YELLOW_CARD, RED_CARD, M_RANDOM},
-    {0x29, 1, POSITIVE, YELLOW_CARD, BLACK_CARD, M_RANDOM},
-    {0x2A, 2, NEGATIVE, BLACK_CARD, GREEN_CARD, M_NONE},
-    {0x2B, 3, NEGATIVE, BLACK_CARD, M_NONE, RED_CARD},
-    {0x2C, 1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
+    {0x28, 1, POSITIVE, YELLOW_CARD, M_RANDOM, M_RANDOM},
+    {0x29, 1, POSITIVE, YELLOW_CARD, M_RANDOM, M_RANDOM},
+    {0x2A, -2, NEGATIVE, BLACK_CARD, M_RANDOM, M_NONE},
+    {0x2B, -1, NEGATIVE, BLACK_CARD, M_NONE, M_RANDOM},
+    {0x2C, -1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card red_cards[] = {
     {0x3E, 1, POSITIVE, RED_CARD, M_NONE, M_NONE},
     {0x31, 1, POSITIVE, RED_CARD, M_NONE, M_NONE},
     {0x32, 1, POSITIVE, RED_CARD, M_NONE, M_NONE},
-    {0x33, 1, POSITIVE, RED_CARD, BLACK_CARD, M_NONE},
+    {0x33, 1, POSITIVE, RED_CARD, M_RANDOM, M_NONE},
     {0x34, 1, POSITIVE, RED_CARD, M_RANDOM, M_NONE},
     {0x35, 1, POSITIVE, RED_CARD, M_NONE, M_RANDOM},
     {0x36, 1, POSITIVE, RED_CARD, M_NONE, M_RANDOM},
     {0x37, 1, POSITIVE, RED_CARD, M_NONE, M_RANDOM},
     {0x38, 1, POSITIVE, RED_CARD, M_RANDOM, M_RANDOM},
     {0x39, 1, POSITIVE, RED_CARD, M_RANDOM, M_RANDOM},
-    {0x3A, 2, NEGATIVE, BLACK_CARD, M_RANDOM, M_NONE},
-    {0x3B, 3, NEGATIVE, BLACK_CARD, M_NONE, M_RANDOM},
-    {0x3C, 1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
+    {0x3A, -2, NEGATIVE, BLACK_CARD, M_RANDOM, M_NONE},
+    {0x3B, -1, NEGATIVE, BLACK_CARD, M_NONE, M_RANDOM},
+    {0x3C, -1, NEGATIVE, BLACK_CARD, M_NONE, M_NONE}};
 
 struct Card * temp_card;
 
@@ -214,7 +214,7 @@ void shuffle(unsigned char (*array)[13]);
 void interact_with_table(void);
 void cancel_card(void);
 void end_of_round(void);
-signed int count_points(void);
+signed char count_points(void);
 void sleep(BYTE byte);
 void update_score_header(void);
 void update_cards_on_table(void);

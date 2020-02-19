@@ -112,7 +112,7 @@ void end_of_round(void) {
 	pp = count_points();
 
 	if (pp > 0) {
-		round_score += pp;
+		round_score += (pp & 0x00FF);
 		round--;
 	}
 	
@@ -133,27 +133,25 @@ void end_of_round(void) {
 	// map_registers = NULL;
 }
 
-signed int count_points(void) {
-	int val = 0;
-	int temp = 0;
+signed char count_points(void) {
+	si = 0;
+	sj = 0;
+	sn = 0;
 	for (i=0; i<4; i++) {
-		temp = (*table_ptr)[i]->value;
-		if ((*table_ptr)[i]->sign == NEGATIVE) temp = -temp;
-
+		si += (*table_ptr)[i]->value;
 		if (i > 0) {
 			if ((*table_ptr)[i]->Lmodifier == (*table_ptr)[i-1]->color) {
-				val+=temp;
+				si += (*table_ptr)[i]->value;
 			}
 		}
 		if (i < 3) {
 			if ((*table_ptr)[i]->Rmodifier == (*table_ptr)[i+1]->color) {
-				val+=temp;
+				si += (*table_ptr)[i]->value;
 			}
 		}
-		val += temp;
 	}
 
-	return val;
+	return si;
 }
 
 void shuffle_decks(void)
@@ -530,8 +528,10 @@ void print_temp_card_on_pos_x_y(unsigned char x, unsigned char y)
 {
 	if (temp_card->sign == NEGATIVE) {
 		oam_spr((x+1)<<3, (y+1)<<3, 45, 0);
+		oam_spr((x+2)<<3, (y+1)<<3, (0xff-temp_card->value+1)+ZERO_CHAR, 0);
+	} else {
+		oam_spr((x+2)<<3, (y+1)<<3, temp_card->value+ZERO_CHAR, 0);
 	}
-	oam_spr((x+2)<<3, (y+1)<<3, temp_card->value+ZERO_CHAR, 0);
 	if (temp_card->Lmodifier != M_NONE) {
 		oam_spr(x<<3, (y+4)<<3, 243, temp_card->Lmodifier);
 	}

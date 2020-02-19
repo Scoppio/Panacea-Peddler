@@ -13,6 +13,10 @@ unsigned char thousands = 0;
 unsigned int address = 0;
 unsigned char index = 0;
 
+signed char si = 0;
+signed char sj = 0;
+signed char sn = 0;
+
 static const unsigned char ZERO_CHAR = '0';
 static const unsigned char HIFEN_CHAR = '-';
 
