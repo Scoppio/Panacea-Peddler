@@ -415,6 +415,7 @@ void _draw(void)
 
 	//draw_card_piles();
 	//draw_cards_table();
+	
 	ppu_wait_nmi();
 }
 
