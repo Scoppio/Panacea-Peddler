@@ -46,6 +46,9 @@ unsigned char GameState = MENU;
 #define YELLOW_IDX (yellow_idx[yellow_size_pt])
 #define RED_IDX (red_idx[red_size_pt])
 #define RANDOM_MODIFIER (rand8() & 0x3)
+#define OFFSET_I(a) (a + i)
+#define OFFSET_J(a) (a + j)
+#define OFFSET_N(a) (a + n)
 
 void _init(void)
 {
@@ -79,7 +82,6 @@ void reset_game(void)
 	pp = 0;
 	second_forever = 0;
 	map_registers = NULL;
-	oam_clear();
 	shuffle_decks();
 }
 
@@ -183,7 +185,6 @@ void shuffle(unsigned char (*array)[13])
 
 void instantiate_card_modifiers(struct Card * cards)
 {
-	set_rand(tick);
 	for (i = 0; i < DECK_CARDS_SIZE; i++) {
 		if (cards[i].Lmodifier != M_NONE) {
 			cards[i].Lmodifier = RANDOM_MODIFIER;
@@ -394,7 +395,7 @@ void controller_menu(void)
 
 void _draw(void)
 {
-
+	clear_vram_buffer();
 #ifdef DEBUG
 	timer_draw();
 #endif
@@ -416,10 +417,7 @@ void _draw(void)
 
 	//draw_card_piles();
 	//draw_cards_table();
-
 	ppu_wait_nmi();
-	clear_vram_buffer();
-
 }
 
 void _cleanup(void)
@@ -483,7 +481,10 @@ void print_table(void)
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(16, 12));
 #endif
 	update_score_header();
+	ppu_wait_nmi();
+
 	update_cards_on_table();
+	ppu_wait_nmi();
 }
 
 void update_score_header(void)
@@ -525,56 +526,94 @@ void update_score_header(void)
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 3));
 }
 
+void print_temp_card_on_pos_x_y(unsigned char x, unsigned char y)
+{
+	if (temp_card->sign == NEGATIVE) {
+		oam_spr((x+1)<<3, (y+1)<<3, 45, 0);
+	}
+	oam_spr((x+2)<<3, (y+1)<<3, temp_card->value+ZERO_CHAR, 0);
+	if (temp_card->Lmodifier != M_NONE) {
+		oam_spr(x<<3, (y+4)<<3, 243, temp_card->Lmodifier);
+	}
+	if (temp_card->Rmodifier != M_NONE) {
+		oam_spr((x+3)<<3, (y+4)<<3, 244, temp_card->Rmodifier);
+	}
+	if (temp_card->color == BLUE_CARD) {
+		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_blue);
+	} else if (temp_card->color == YELLOW_CARD) {
+		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_yellow);
+	} else if (temp_card->color == RED_CARD) {
+		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_red);
+	} else if (temp_card->color == GREEN_CARD) {
+		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_green);
+	} else if (temp_card->color == BLACK_CARD){
+		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_black);
+	}
+
+}
+
+void print_cursor(void)
+{
+	if (cursor.cell < 4) {
+		j = 21;
+		i = 11 + cursor.cell*4;
+	} else {
+		j = 13;
+		i = 11 + (cursor.cell - 4)*4;
+	}
+	oam_meta_spr(i<<3, j<<3, metasprite_cursor);
+	oam_meta_spr(i<<3, (j+7)<<3, metasprite_cursor);
+
+}
+
 void update_cards_on_table(void)
 {
-	// ppu_off();
 	oam_clear();
 	// print card cost
 	temp_card = &blue_cards[BLUE_IDX];
-	if (temp_card->sign == NEGATIVE) {
-		oam_spr(14<<3, 23<<3, 45, 0);
-	}
-	oam_spr(15<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
-	if (temp_card->Lmodifier != M_NONE) {
-		oam_spr(12<<3, 26<<3, 243, temp_card->Lmodifier);
-	}
-	if (temp_card->Rmodifier != M_NONE) {
-		oam_spr(15<<3, 26<<3, 244, temp_card->Rmodifier);
-	}
+	print_temp_card_on_pos_x_y(12, 22);
+	
 	temp_card = &green_cards[GREEN_IDX];
-	if (temp_card->sign == NEGATIVE) {
-		oam_spr(17<<3, 23<<3, 45, 0);
-	}
-	oam_spr(18<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
-	if (temp_card->Lmodifier != M_NONE) {
-		oam_spr(16<<3, 26<<3, 243, temp_card->Lmodifier);
-	}
-	if (temp_card->Rmodifier != M_NONE) {
-		oam_spr(19<<3, 26<<3, 244, temp_card->Rmodifier);
+	print_temp_card_on_pos_x_y(16, 22);
+	
+	temp_card = &yellow_cards[YELLOW_IDX];
+	print_temp_card_on_pos_x_y(20, 22);
+	
+	temp_card = &red_cards[RED_IDX];
+	print_temp_card_on_pos_x_y(24, 22);
+	
+	if (cursor.card != NULL)
+	{
+		temp_card = cursor.card;
+		print_temp_card_on_pos_x_y(4, 18);
 	}
 
-	temp_card = &yellow_cards[YELLOW_IDX];
-	if (temp_card->sign == NEGATIVE) {
-		oam_spr(21<<3, 23<<3, 45, 0);
+	if ((*table_ptr)[0] != NULL)
+	{
+		temp_card = (*table_ptr)[0];
+		print_temp_card_on_pos_x_y(12, 14);
 	}
-	oam_spr(22<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
-	if (temp_card->Lmodifier != M_NONE) {
-		oam_spr(20<<3, 26<<3, 243, 0);
+
+	if ((*table_ptr)[1] != NULL)
+	{
+		temp_card = (*table_ptr)[1];
+		print_temp_card_on_pos_x_y(16, 14);
 	}
-	if (temp_card->Rmodifier != M_NONE) {
-		oam_spr(23<<3, 26<<3, 244, temp_card->Rmodifier);
+	if ((*table_ptr)[2] != NULL)
+	{
+		temp_card = (*table_ptr)[2];
+		print_temp_card_on_pos_x_y(20, 14);
 	}
-	temp_card = &red_cards[RED_IDX];
-	if (temp_card->sign == NEGATIVE) {
-		oam_spr(25<<3, 23<<3, 45, 0);
+	
+	if ((*table_ptr)[3] != NULL)
+	{
+		temp_card = (*table_ptr)[3];
+		print_temp_card_on_pos_x_y(24, 14);
 	}
-	oam_spr(26<<3, 23<<3, temp_card->value+ZERO_CHAR, 0);
-	if (temp_card->Lmodifier != M_NONE) {
-		oam_spr(24<<3, 26<<3, 243, temp_card->Lmodifier);
-	}
-	if (temp_card->Rmodifier != M_NONE) {
-		oam_spr(27<<3, 26<<3, 244, temp_card->Rmodifier);
-	}
+	
+	// print cursor position
+	print_cursor();
+
 	// 76543210
 	// ||||||||
 	// ||||||++- Palette (4 to 7) of sprite
@@ -593,37 +632,7 @@ void update_cards_on_table(void)
 		// (22 14 25 19 (24 15)) 
 		// (22 14 29 19 (28 15))
 
-	// update deck card = 
-		// (14 22 17 27 (16 23)) 
-		// (18 22 21 27 (20 23)) 
-		// (22 22 25 27 (24 23)) 
-		// (22 22 29 27 (28 23))
-
 	// position challenge symbols
-
-
-	// for(i=0; ;i+=0x20){
-	// 	for(j=0; ;j+=0x20){
-	// 		clear_vram_buffer(); // do each frame, and before putting anything in the buffer
-	// 		address = get_ppu_addr(0, j, i);
-	// 		index = (i & 0xf0) + (j >> 4);
-	// 		buffer_4_mt(address, index); // ppu_address, index to the data
-			
-	// 		address = get_at_addr(0,j,i);
-	// 		vram_adr(address); // nametable A's attribute table 23c0-23ff
-	// 		vram_fill(0, 8); // 8 bytes of 00 00 00 00
-	// 		vram_fill(0x55, 8); // 8 bytes of 01 01 01 01
-	// 		vram_fill(0xAA, 8); // 8 bytes of 10 10 10 10
-	// 		vram_fill(0xFF, 8); // 8 bytes of 11 11 11 11
-			
-	// 		flush_vram_update_nmi();
-	// 		if (j == 0xe0) break;
-	// 	}
-	// 	if (i == 0xe0) break;
-	// }
-	// set_scroll_y(0xff);
-	// clear_vram_buffer(); 
-	// ppu_on_all();
 }
 
 void print_entry(void)
@@ -643,6 +652,7 @@ void print_menu(void)
 void print_scores(void) 
 {
 	if (map_registers != END_SCREEN_DRAWN) {
+		
 		load_room();
 		
 		for (j = 0; j < 5; j++)
@@ -696,6 +706,7 @@ void load_room() {
 		break;
 	}
 	ppu_off();
+	oam_clear();
 	for(i=0; ;i+=0x20){
 		for(j=0; ;j+=0x20){
 			clear_vram_buffer(); // do each frame, and before putting anything in the buffer
@@ -707,7 +718,7 @@ void load_room() {
 		}
 		if (i == 0xe0) break;
 	}
-	
+	// Paint the cards each with a different collor
 	if (map_registers == GAME_DRAWN) {
 		n = 0;
 		for (i = 12; i < 25; i+=4) {
@@ -721,6 +732,7 @@ void load_room() {
 		}
 	}
 	set_scroll_y(0xff);
+	
 	clear_vram_buffer(); 
 	ppu_on_all();
 }
