@@ -1,4 +1,42 @@
 
+const unsigned char challenge_table[]={
+	3,
+	0,
+	1,
+	2,
+	3,
+	0,
+	1,
+	2,
+	3,
+	1,
+	0,
+	2,
+	3,
+	5,
+	0,
+	1
+};
+
+const unsigned char preferred_table[]={
+	0,
+	1,
+	2,
+	3,
+	5,
+	1,
+	2,
+	3,
+	2,
+	0,
+	2,
+	3,
+	1,
+	0,
+	1,
+	3
+};
+
 const unsigned char metasprite_yellow[]={
 	  0,  0,0xb0,0,
 	  8,  0,0xb1,0,
@@ -39,7 +77,7 @@ const unsigned char metasprite_black[]={
 	128
 };
 
-const unsigned char metasprite_cursor[]={
+const unsigned char metasprite_cursor_up[]={
 	  0,  0,0xe6,0,
 	  8,  0,0xf6,0,
 	 16,  0,0xf6,0,
@@ -49,12 +87,14 @@ const unsigned char metasprite_cursor[]={
 	128
 };
 
-const unsigned char card_simbol[]={
-    4,5,20,21,0, // BLUE
-    8,9,24,25,0, // GREEN
-    2,3,18,19,0, // YELLOW
-    6,7,22,23,0, // RED
-    10,11,26,27,0 // BLACK
+const unsigned char metasprite_cursor_down[]={
+	  0,  0,0xe6,0,
+	  8,  0,0xd6,0,
+	 16,  0,0xd6,0,
+	 24,  0,0xd6,0,
+	 32,  0,0xd6,0,
+	 40,  0,0xe6,0,
+	128
 };
 
 const unsigned char card_palete[] ={

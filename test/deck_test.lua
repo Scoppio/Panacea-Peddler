@@ -7,7 +7,7 @@ local M = {}
 local function execute()
     -- up down left right start select A B
     assertions.createTestContext("deck_test")
-     --  0 = blue
+    --  0 = blue
     --  1 = green
     --  2 = yellow
     --  3 = red

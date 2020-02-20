@@ -82,6 +82,8 @@ void reset_game(void)
 	pp = 0;
 	second_forever = 0;
 	map_registers = NULL;
+	challenge = 0;
+	preferred = 1;
 	shuffle_decks();
 }
 
@@ -120,6 +122,18 @@ void end_of_round(void) {
 	(*table_ptr)[1] = NULL;
 	(*table_ptr)[2] = NULL;
 	(*table_ptr)[3] = NULL;
+	i = 0;
+	do {
+		i = rand8() % 4;
+		i = i == 4 ? BLACK_CARD : i;
+	} while (i == challenge);
+	challenge = i;
+	i = 0;
+	do {
+		i = rand8() % 4;
+		i = i == 4 ? BLACK_CARD : i;
+	} while (i == challenge);
+	preferred = i;
 
 	if (round == 0 || pp <= 0) {
 		GameState = ENDSCREEN;
@@ -135,8 +149,6 @@ void end_of_round(void) {
 
 signed char count_points(void) {
 	si = 0;
-	sj = 0;
-	sn = 0;
 	for (i=0; i<4; i++) {
 		si += (*table_ptr)[i]->value;
 		if (i > 0) {
@@ -150,7 +162,6 @@ signed char count_points(void) {
 			}
 		}
 	}
-
 	return si;
 }
 
@@ -165,6 +176,10 @@ void shuffle_decks(void)
 	instantiate_card_modifiers(blue_cards);
 	instantiate_card_modifiers(green_cards);
 	instantiate_card_modifiers(yellow_cards);
+	i = rand8()&0x0f;
+	challenge = challenge_table[i];
+	preferred = preferred_table[i];
+
 }
 
 void shuffle(unsigned char (*array)[13])
@@ -256,19 +271,8 @@ void interact_with_table()
 		} else {
 			play_sound(snd_ILLEGAL_ACTION);
 		}
-		
-
 		// placed_on_table = placed_on_table << 1;
 	}
-}
-
-void copycard(struct Card * target, struct Card * origin)
-{
-	target->id = origin->id;
-	target->color = origin->color;
-	target->Lmodifier = origin->Lmodifier;
-	target->Rmodifier = origin->Rmodifier;
-	target->value = origin->value;
 }
 
 /*	Cancel Card
@@ -413,9 +417,6 @@ void _draw(void)
 			break;
 	}
 
-	//draw_card_piles();
-	//draw_cards_table();
-	
 	ppu_wait_nmi();
 }
 
@@ -525,11 +526,44 @@ void update_score_header(void)
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 3));
 }
 
+void print_challenge()
+{
+	i = 22;
+	j = 50;
+	
+	if (challenge == BLUE_CARD) {
+		oam_meta_spr(i, j, metasprite_blue);
+	} else if (challenge == YELLOW_CARD) {
+		oam_meta_spr(i, j, metasprite_yellow);
+	} else if (challenge == RED_CARD) {
+		oam_meta_spr(i, j, metasprite_red);
+	} else if (challenge == GREEN_CARD) {
+		oam_meta_spr(i, j, metasprite_green);
+	} else if (challenge == BLACK_CARD){
+		oam_meta_spr(i, j, metasprite_black);
+	}
+	
+	i = 86;
+	j = 50;
+	
+	if (preferred == BLUE_CARD) {
+		oam_meta_spr(i, j, metasprite_blue);
+	} else if (preferred == YELLOW_CARD) {
+		oam_meta_spr(i, j, metasprite_yellow);
+	} else if (preferred == RED_CARD) {
+		oam_meta_spr(i, j, metasprite_red);
+	} else if (preferred == GREEN_CARD) {
+		oam_meta_spr(i, j, metasprite_green);
+	} else if (preferred == BLACK_CARD){
+		oam_meta_spr(i, j, metasprite_black);
+	}
+}
+
 void print_temp_card_on_pos_x_y(unsigned char x, unsigned char y)
 {
-	if (temp_card->sign == NEGATIVE) {
+	if (temp_card->value & 0xF0 && temp_card->value != 0) {
 		oam_spr((x+1)<<3, (y+1)<<3, 45, 0);
-		oam_spr((x+2)<<3, (y+1)<<3, (0xff-temp_card->value+1)+ZERO_CHAR, 0);
+		oam_spr((x+2)<<3, (y+1)<<3, ((0xff-temp_card->value)+1)+ZERO_CHAR, 0);
 	} else {
 		oam_spr((x+2)<<3, (y+1)<<3, temp_card->value+ZERO_CHAR, 0);
 	}
@@ -562,9 +596,8 @@ void print_cursor(void)
 		j = 13;
 		i = 11 + (cursor.cell - 4)*4;
 	}
-	oam_meta_spr(i<<3, j<<3, metasprite_cursor);
-	oam_meta_spr(i<<3, (j+7)<<3, metasprite_cursor);
-
+	oam_meta_spr(i<<3, j<<3, metasprite_cursor_up);
+	oam_meta_spr(i<<3, (j+7)<<3, metasprite_cursor_down);
 }
 
 void update_cards_on_table(void)
@@ -615,25 +648,7 @@ void update_cards_on_table(void)
 	// print cursor position
 	print_cursor();
 
-	// 76543210
-	// ||||||||
-	// ||||||++- Palette (4 to 7) of sprite
-	// |||+++--- Unimplemented
-	// ||+------ Priority (0: in front of background; 1: behind background)
-	// |+------- Flip sprite horizontally
-	// +-------- Flip sprite vertically
-
-	// card (x6 y22 -> x9 y27 (x8 y23))
-	// update cursor card  = 
-		// (6 22 9 27 (8 23))
-
-	// update table cards = 
-		// (14 14 17 19 (16 15)) 
-		// (18 14 21 19 (20 15)) 
-		// (22 14 25 19 (24 15)) 
-		// (22 14 29 19 (28 15))
-
-	// position challenge symbols
+	print_challenge();
 }
 
 void print_entry(void)
