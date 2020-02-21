@@ -149,6 +149,7 @@ void end_of_round(void) {
 
 signed char count_points(void) {
 	sj = 0;
+	j = FALSE;
 	for (i=0; i<4; i++) {
 		si = 0;
 		si += (*table_ptr)[i]->value;
@@ -493,6 +494,16 @@ void print_table(void)
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(16, 12));
 	
 #endif
+	update_card_count();
+	update_score_header();
+	ppu_wait_nmi();
+
+	update_cards_on_table();
+	ppu_wait_nmi();
+}
+
+void update_card_count(void)
+{
 	i = 13-blue_size_pt;
 	convert_i_to_decimal();
 	cards_count[0] = tens;
@@ -511,11 +522,6 @@ void print_table(void)
 	cards_count[13] = ones;
 	multi_vram_buffer_horz(cards_count, sizeof(cards_count), NTADR_A(13, 28));
 	
-	update_score_header();
-	ppu_wait_nmi();
-
-	update_cards_on_table();
-	ppu_wait_nmi();
 }
 
 void update_score_header(void)
@@ -547,7 +553,7 @@ void update_score_header(void)
 	// seconds
 	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 2));
 	
-	i = round;
+	i = 14 - round;
 	
 	convert_i_to_decimal();
 	
@@ -590,30 +596,30 @@ void print_challenge()
 	}
 }
 
-void print_temp_card_on_pos_x_y(unsigned char x, unsigned char y)
+void print_temp_card_on_pos_x_y(void)
 {
 	if (temp_card->value & 0xF0 && temp_card->value != 0) {
-		oam_spr((x+1)<<3, (y+1)<<3, 45, 0);
-		oam_spr((x+2)<<3, (y+1)<<3, ((0xff-temp_card->value)+1)+ZERO_CHAR, 0);
+		oam_spr((i+1)<<3, (j+1)<<3, 45, 0);
+		oam_spr((i+2)<<3, (j+1)<<3, ((0xff-temp_card->value)+1)+ZERO_CHAR, 0);
 	} else {
-		oam_spr((x+2)<<3, (y+1)<<3, temp_card->value+ZERO_CHAR, 0);
+		oam_spr((i+2)<<3, (j+1)<<3, temp_card->value+ZERO_CHAR, 0);
 	}
 	if (temp_card->Lmodifier != M_NONE) {
-		oam_spr(x<<3, (y+4)<<3, 243, temp_card->Lmodifier);
+		oam_spr(i<<3, (j+4)<<3, 243, temp_card->Lmodifier);
 	}
 	if (temp_card->Rmodifier != M_NONE) {
-		oam_spr((x+3)<<3, (y+4)<<3, 244, temp_card->Rmodifier);
+		oam_spr((i+3)<<3, (j+4)<<3, 244, temp_card->Rmodifier);
 	}
 	if (temp_card->color == BLUE_CARD) {
-		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_blue);
+		oam_meta_spr((i+1)<<3, (j+2)<<3, metasprite_blue);
 	} else if (temp_card->color == YELLOW_CARD) {
-		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_yellow);
+		oam_meta_spr((i+1)<<3, (j+2)<<3, metasprite_yellow);
 	} else if (temp_card->color == RED_CARD) {
-		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_red);
+		oam_meta_spr((i+1)<<3, (j+2)<<3, metasprite_red);
 	} else if (temp_card->color == GREEN_CARD) {
-		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_green);
+		oam_meta_spr((i+1)<<3, (j+2)<<3, metasprite_green);
 	} else if (temp_card->color == BLACK_CARD){
-		oam_meta_spr((x+1)<<3, (y+2)<<3, metasprite_black);
+		oam_meta_spr((i+1)<<3, (j+2)<<3, metasprite_black);
 	}
 
 }
@@ -635,50 +641,37 @@ void update_cards_on_table(void)
 {
 	oam_clear();
 	// print card cost
+	i = 12, j=22;
 	temp_card = &blue_cards[BLUE_IDX];
-	print_temp_card_on_pos_x_y(12, 22);
-	
+	print_temp_card_on_pos_x_y();
+	i = 16;
 	temp_card = &green_cards[GREEN_IDX];
-	print_temp_card_on_pos_x_y(16, 22);
-	
+	print_temp_card_on_pos_x_y();
+	i = 20;
 	temp_card = &yellow_cards[YELLOW_IDX];
-	print_temp_card_on_pos_x_y(20, 22);
-	
+	print_temp_card_on_pos_x_y();
+	i = 24;
 	temp_card = &red_cards[RED_IDX];
-	print_temp_card_on_pos_x_y(24, 22);
+	print_temp_card_on_pos_x_y();
 	
 	if (cursor.card != NULL)
 	{
+		i = 4, j = 18;
 		temp_card = cursor.card;
-		print_temp_card_on_pos_x_y(4, 18);
+		print_temp_card_on_pos_x_y();
 	}
-
-	if ((*table_ptr)[0] != NULL)
-	{
-		temp_card = (*table_ptr)[0];
-		print_temp_card_on_pos_x_y(12, 14);
+	j = 14;
+	i = 12;
+	for (n = 0; n < 4; n++) {
+		if ((*table_ptr)[n] != NULL)
+		{
+			temp_card = (*table_ptr)[n];
+			print_temp_card_on_pos_x_y();
+		}
+		i += 4;
 	}
-
-	if ((*table_ptr)[1] != NULL)
-	{
-		temp_card = (*table_ptr)[1];
-		print_temp_card_on_pos_x_y(16, 14);
-	}
-	if ((*table_ptr)[2] != NULL)
-	{
-		temp_card = (*table_ptr)[2];
-		print_temp_card_on_pos_x_y(20, 14);
-	}
-	
-	if ((*table_ptr)[3] != NULL)
-	{
-		temp_card = (*table_ptr)[3];
-		print_temp_card_on_pos_x_y(24, 14);
-	}
-	
 	// print cursor position
 	print_cursor();
-
 	print_challenge();
 }
 

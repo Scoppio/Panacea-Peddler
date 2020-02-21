@@ -200,10 +200,13 @@ void print_entry(void);
 void print_menu(void);
 void print_table(void);
 void print_scores(void);
-void print_temp_card_on_pos_x_y(unsigned char x, unsigned char y);
+void print_temp_card_on_pos_x_y(void);
 void print_cursor(void);
 void print_challenge(void);
 
+void update_card_count(void);
+void update_score_header(void);
+void update_cards_on_table(void);
 
 void get_card_on_deck(void);
 
@@ -212,6 +215,7 @@ void controller_menu(void);
 void controller_menu_settings(void);
 void controller_game(void);
 void controller_endscreen(void);
+
 void shuffle_decks(void);
 void instantiate_card_modifiers(struct Card * cards);
 void shuffle(unsigned char (*array)[13]);
@@ -219,9 +223,8 @@ void interact_with_table(void);
 void cancel_card(void);
 void end_of_round(void);
 signed char count_points(void);
+
 void sleep(BYTE byte);
-void update_score_header(void);
-void update_cards_on_table(void);
 
 
 void _clock_counter(void)

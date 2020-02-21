@@ -48,22 +48,14 @@ const unsigned char metasprite_black[]={
 };
 
 const unsigned char metasprite_cursor_up[]={
-	  0,  0,0xe6,0,
-	  8,  0,0xf6,0,
-	 16,  0,0xf6,0,
-	 24,  0,0xf6,0,
-	 32,  0,0xf6,0,
-	 40,  0,0xe6,0,
+	  4,  3,0xd5,0,
+	 36,  3,0xd7,0,
 	128
 };
 
 const unsigned char metasprite_cursor_down[]={
-	  0,  0,0xe6,0,
-	  8,  0,0xd6,0,
-	 16,  0,0xd6,0,
-	 24,  0,0xd6,0,
-	 32,  0,0xd6,0,
-	 40,  0,0xe6,0,
+	  4,  -3,0xf5,0,
+	 36,  -3,0xf7,0,
 	128
 };
 
@@ -73,11 +65,6 @@ const unsigned char card_palete[] ={
     0b00000000, // yellow
     0b10101010, // red
 };
-
-const unsigned char cursor_mt[] = {
-    230,214,214,214,214,230
-};
-
 
 // unused
 const unsigned char card[]={
