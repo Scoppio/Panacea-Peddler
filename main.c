@@ -18,7 +18,7 @@
 
 #pragma bss - name(push, "ZEROPAGE")
 
-#define DEBUG
+// #define DEBUG
 
 // Game states
 #define MENU 0
@@ -148,21 +148,33 @@ void end_of_round(void) {
 }
 
 signed char count_points(void) {
-	si = 0;
+	sj = 0;
 	for (i=0; i<4; i++) {
+		si = 0;
 		si += (*table_ptr)[i]->value;
 		if (i > 0) {
 			if ((*table_ptr)[i]->Lmodifier == (*table_ptr)[i-1]->color) {
-				si += (*table_ptr)[i]->value;
+				sj += si;
 			}
 		}
 		if (i < 3) {
 			if ((*table_ptr)[i]->Rmodifier == (*table_ptr)[i+1]->color) {
-				si += (*table_ptr)[i]->value;
+				sj += si;
 			}
 		}
+		if ((*table_ptr)[i]->color == challenge) {
+			j = TRUE;
+		}
+		if ((*table_ptr)[i]->color == preferred) {
+			sj += si;
+		}
+		
+		sj += si;
 	}
-	return si;
+	if (j == FALSE) {
+		sj = 0;
+	}
+	return sj;
 }
 
 void shuffle_decks(void)
@@ -479,7 +491,26 @@ void print_table(void)
 	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(16, 8));
 	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(16, 10));
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(16, 12));
+	
 #endif
+	i = 13-blue_size_pt;
+	convert_i_to_decimal();
+	cards_count[0] = tens;
+	cards_count[1] = ones;
+	i = 13-green_size_pt;
+	convert_i_to_decimal();
+	cards_count[4] = tens;
+	cards_count[5] = ones;
+	i = 13-yellow_size_pt;
+	convert_i_to_decimal();
+	cards_count[8] = tens;
+	cards_count[9] = ones;
+	i = 13-red_size_pt;
+	convert_i_to_decimal();
+	cards_count[12] = tens;
+	cards_count[13] = ones;
+	multi_vram_buffer_horz(cards_count, sizeof(cards_count), NTADR_A(13, 28));
+	
 	update_score_header();
 	ppu_wait_nmi();
 

@@ -10,6 +10,7 @@ const unsigned char GAME_TEXT [] = "GAME  ";
 const unsigned char SCORE_TEXT [] = "SCORE:";
 unsigned char score_text[] = "ABC - 9999";
 
+unsigned char cards_count [] = "00  00  00  00";
 unsigned char table_debug_text [] = " 00 00 00 00";
 unsigned char deck_debug_text [] = " 00 00 00 00";
 unsigned char cursor_text [] = "C: 0 C-ID: 00";

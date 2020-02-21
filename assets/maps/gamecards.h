@@ -1,40 +1,10 @@
 
 const unsigned char challenge_table[]={
-	3,
-	0,
-	1,
-	2,
-	3,
-	0,
-	1,
-	2,
-	3,
-	1,
-	0,
-	2,
-	3,
-	5,
-	0,
-	1
+	3, 0, 1, 2, 3, 0, 1, 2, 3, 1, 0, 2, 3, 5, 0, 1
 };
 
 const unsigned char preferred_table[]={
-	0,
-	1,
-	2,
-	3,
-	5,
-	1,
-	2,
-	3,
-	2,
-	0,
-	2,
-	3,
-	1,
-	0,
-	1,
-	3
+	0, 1, 2, 3, 5, 1, 2, 3, 2, 0, 2, 3, 1, 0, 1, 3
 };
 
 const unsigned char metasprite_yellow[]={
