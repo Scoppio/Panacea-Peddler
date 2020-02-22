@@ -288,6 +288,7 @@ void interact_with_table()
 	}
 }
 
+
 /*	Cancel Card
 *
 *	If you have a card in the cursor, it will release 

@@ -29,14 +29,6 @@ static const unsigned char SIXTY = 60;
 typedef unsigned char COLOR_;
 typedef unsigned char BYTE;
 
-struct SpObject
-{
-    unsigned char X;
-    unsigned char Y;
-    unsigned char width;
-    unsigned char height;
-};
-
 #define BLUE_CARD 0
 #define GREEN_CARD 1
 #define YELLOW_CARD 2
@@ -67,9 +59,6 @@ struct Cursor
     struct Card *card;
     unsigned char cell;
 };
-
-// struct SpObject Paddle = {0x75, PADDLE_Y, 0x1f, 7};
-// struct SpObject Ball = {0xff, 0xff, 5, 5}; // balls x and x will be init later
 
 struct Cursor cursor;
 struct Card *table[4];
