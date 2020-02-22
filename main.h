@@ -23,7 +23,7 @@ unsigned char second = 0;
 unsigned int second_forever = 0;
 unsigned char minute = 0;
 unsigned char hour = 0;
-unsigned char counter = 60;
+unsigned char counter = 20;
 static const unsigned char SIXTY = 60;
 
 typedef unsigned char COLOR_;
@@ -231,11 +231,12 @@ void _clock_counter(void)
 {
     tick++;
     counter--;
+    
     if (counter == 0)
     {
         second++;
         second_forever++;
-        counter = SIXTY;
+        counter = 20;
         if (second == SIXTY)
         {
             minute++;
