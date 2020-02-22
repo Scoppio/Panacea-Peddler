@@ -65,7 +65,7 @@ game.nes: $(DEPS)
 
 # Build process - tmx to h files
 $(ASSETS_MAPS)/%.h: $(ASSETS_MAPS)/%.tmx
-	python scripts/convert_tiledxml_2_gamefile.py $^ > $@
+	python scripts/convert_tiledxml_2_gamefile.py $^ $@
 	@echo Making $<
 
 maps: $(patsubst %.tmx,%.h,$(wildcard $(ASSETS_MAPS)/*.tmx))

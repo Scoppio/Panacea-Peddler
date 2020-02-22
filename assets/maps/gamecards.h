@@ -59,6 +59,55 @@ const unsigned char metasprite_cursor_down[]={
 	128
 };
 
+const unsigned char metasprite_client1[]={
+	  0,  0,0x86, 0,
+	  8,  0,0x87, 0,
+	  0,  8,0x96, 0,
+	  8,  8,0x97, 0,
+	  0,  16,0xa6,0,
+	  8,  16,0xa7,0,
+	128
+};
+
+const unsigned char metasprite_client2[]={
+	  0,  0,0x84, 0,
+	  8,  0,0x85, 0,
+	  0,  8,0x94, 0,
+	  8,  8,0x95, 0,
+	  0,  16,0xa4,0,
+	  8,  16,0xa5,0,
+	128
+};
+const unsigned char metasprite_client3[]={
+	  0,  0,0x82, 0,
+	  8,  0,0x83, 0,
+	  0,  8,0x92, 0,
+	  8,  8,0x93, 0,
+	  0,  16,0xa2,0,
+	  8,  16,0xa3,0,
+	128
+};
+const unsigned char metasprite_client4[]={
+	  0,  0,0x80, 0,
+	  8,  0,0x81, 0,
+	  0,  8,0x90, 0,
+	  8,  8,0x91, 0,
+	  0,  16,0xa0,0,
+	  8,  16,0xa1,0,
+	128
+};
+
+const unsigned char metasprite_client5[]={
+	  0,  0,0x80, 0,
+	  8,  0,0x81, 0,
+	  0,  8,0x90, 0,
+	  8,  8,0x91, 0,
+	  0,  16,0xa0,0,
+	  8,  16,0xa1,0,
+	128
+};
+
+
 const unsigned char card_palete[] ={
     0b01010101, // blue
     0b11111111, // green

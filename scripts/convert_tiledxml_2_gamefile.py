@@ -6,6 +6,7 @@
 # in NES C code for cc65
 
 import sys
+import os
 import csv
 from io import StringIO
 import xml.etree.ElementTree as et
@@ -47,6 +48,9 @@ class MetatileSet(object):
             self.metatiles.append(metatile)
             self.hashtable[hash(metatile)] = (len(self.metatiles) - 1, metatile)
 
+        if len(self.metatiles) > 51:
+            raise ValueError("ERROR - The room surpassed the maximum allowed number of 51 metatiles!")
+
         return self.hashtable[hash(metatile)][0]
 
     def __contains__(self, item):
@@ -57,6 +61,7 @@ class MetatileSet(object):
 
 
 def make_room(name, data):
+    print("Parsing room", name)
     m, r = make_metatiles_and_room(data)
     return print_room_and_metatile(name, m, r)
 
@@ -84,18 +89,16 @@ def make_metatiles_and_room(matrix):
     for line in range(0, rows, 2):
         roomline = []
         for col in range(0, columns, 2):
-            try:
-                tl = int(matrix[line][col])
-                tr = int(matrix[line][col + 1])
-                bl = int(matrix[line + 1][col])
-                br = int(matrix[line + 1][col + 1])
-                m = Metatile(tl, tr, bl, br, 0)
-                idx = metatileset + m
-                roomline.append(idx)
-            except Exception as e:
-                print(name, e, line, col, rows, columns, len(matrix), len(matrix[0]))
-                exit(1)
+            tl = int(matrix[line][col])
+            tr = int(matrix[line][col + 1])
+            bl = int(matrix[line + 1][col])
+            br = int(matrix[line + 1][col + 1])
+            m = Metatile(tl, tr, bl, br, 0)
+            idx = metatileset + m
+            roomline.append(idx)
         room.append(roomline)
+
+    print("metatiles | {metatiles}".format(metatiles=len(metatileset.metatiles)))
 
     return metatileset, room
 
@@ -103,15 +106,23 @@ def make_metatiles_and_room(matrix):
 if __name__ == "__main__":
     filename = sys.argv[1]
     outputfile_name = filename[0:-4] + ".h"
-
+    outputfile = sys.argv[2]
     root = et.parse(filename).getroot()
-    for type_tag in root.findall('layer'):
-        name = type_tag.attrib["name"]
-        data = type_tag.find('data')
-        v = data.text[1:].replace(",\n", "\n")
-        f = StringIO(v)
-        l = list(csv.reader(f))
-        s = make_room("room_" + name, l)
-        print(s)
+    with open(outputfile, 'w') as writer:
+        for type_tag in root.findall('layer'):
+            name = type_tag.attrib["name"]
+            data = type_tag.find('data')
+            v = data.text[1:].replace(",\n", "\n")
+            f = StringIO(v)
+            l = list(csv.reader(f))
+            try:
+                s = make_room("room_" + name, l)
+            except Exception as e:
+                print(e)
+                writer.close()
+                os.remove(outputfile)
+                raise e
+
+            writer.write(s)
 
     exit(0)
