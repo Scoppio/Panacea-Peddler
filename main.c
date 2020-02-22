@@ -788,7 +788,6 @@ void timer_draw(void)
 	datetime[4] = ones;
 	datetime[3] = tens;
 	i = hour;
-	
 	convert_i_to_decimal();
 	datetime[1] = ones;
 	datetime[0] = tens;
