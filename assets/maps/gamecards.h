@@ -49,6 +49,51 @@ const unsigned char tile_black_top[]={
 const unsigned char tile_black_down[]={
 	118, 119
 };
+
+////////////////
+
+
+const unsigned char tile_yellow_top_bg[]={
+	2, 3
+};
+const unsigned char tile_yellow_down_bg[]={
+	18, 19
+};
+
+
+const unsigned char tile_blue_top_bg[]={
+	4, 5
+};
+const unsigned char tile_blue_down_bg[]={
+	20, 21
+};
+
+
+const unsigned char tile_red_top_bg[]={
+	6, 7
+};
+const unsigned char tile_red_down_bg[]={
+	22, 23
+};
+
+
+const unsigned char tile_green_top_bg[]={
+	8, 9
+};
+const unsigned char tile_green_down_bg[]={
+	24, 25
+};
+
+
+const unsigned char tile_black_top_bg[]={
+	10, 11
+};
+const unsigned char tile_black_down_bg[]={
+	26, 27
+};
+
+////////////////
+
 const unsigned char metasprite_yellow[]={
 	  0,  0,0xb0,0,
 	  8,  0,0xb1,0,
