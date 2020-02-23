@@ -1,4 +1,8 @@
 
+const unsigned char clients[]={
+	0, 1, 2, 4, 3, 1, 0, 3, 2, 4, 1, 0, 1, 3, 2, 4
+};
+
 const unsigned char challenge_table[]={
 	3, 0, 1, 2, 3, 0, 1, 2, 3, 1, 0, 2, 3, 5, 0, 1
 };
@@ -7,6 +11,44 @@ const unsigned char preferred_table[]={
 	0, 1, 2, 3, 5, 1, 2, 3, 2, 0, 2, 3, 1, 0, 1, 3
 };
 
+const unsigned char tile_yellow_top[]={
+	176, 177
+};
+const unsigned char tile_yellow_down[]={
+	192, 193
+};
+
+
+const unsigned char tile_blue_top[]={
+	178, 179
+};
+const unsigned char tile_blue_down[]={
+	194, 195
+};
+
+
+const unsigned char tile_red_top[]={
+	180, 181
+};
+const unsigned char tile_red_down[]={
+	196, 197
+};
+
+
+const unsigned char tile_green_top[]={
+	182, 183
+};
+const unsigned char tile_green_down[]={
+	198, 199
+};
+
+
+const unsigned char tile_black_top[]={
+	102, 103
+};
+const unsigned char tile_black_down[]={
+	118, 119
+};
 const unsigned char metasprite_yellow[]={
 	  0,  0,0xb0,0,
 	  8,  0,0xb1,0,
@@ -59,6 +101,16 @@ const unsigned char metasprite_cursor_down[]={
 	128
 };
 
+const unsigned char metasprite_client0[]={
+	  0,  0,0x80, 0,
+	  8,  0,0x81, 0,
+	  0,  8,0x90, 0,
+	  8,  8,0x91, 0,
+	  0,  16,0xa0,0,
+	  8,  16,0xa1,0,
+	128
+};
+
 const unsigned char metasprite_client1[]={
 	  0,  0,0x86, 0,
 	  8,  0,0x87, 0,
@@ -96,17 +148,6 @@ const unsigned char metasprite_client4[]={
 	  8,  16,0xa1,0,
 	128
 };
-
-const unsigned char metasprite_client5[]={
-	  0,  0,0x80, 0,
-	  8,  0,0x81, 0,
-	  0,  8,0x90, 0,
-	  8,  8,0x91, 0,
-	  0,  16,0xa0,0,
-	  8,  16,0xa1,0,
-	128
-};
-
 
 const unsigned char card_palete[] ={
     0b01010101, // blue

@@ -5,6 +5,7 @@
 #define snd_POPUP 3
 #define snd_MOVE_CURSOR 4
 #define snd_ACTION_CURSOR 5
+#define snd_KICK_CLIENT 6
 
 void play_sound(unsigned char nmr) {}
 

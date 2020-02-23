@@ -29,6 +29,12 @@ static const unsigned char SIXTY = 60;
 typedef unsigned char COLOR_;
 typedef unsigned char BYTE;
 
+unsigned char update_reg = 0;
+#define SECONDS_UPDATED 1
+#define CLIENT_UPDATED 2
+#define SCORE_UPDATED 4
+#define CARD_ON_TABLE_UPDATED 8
+
 #define BLUE_CARD 0
 #define GREEN_CARD 1
 #define YELLOW_CARD 2
@@ -73,8 +79,7 @@ unsigned char round = 0;
 signed char pp = 0;
 
 unsigned char challenge = 0;
-unsigned char preferred = 0;
-
+unsigned char kicked_client = FALSE;
 unsigned char map_registers = 0x00;
 
 unsigned char red_bc_count = 3;
@@ -205,6 +210,7 @@ void controller_menu_settings(void);
 void controller_game(void);
 void controller_endscreen(void);
 
+void get_client_sprite(void);
 void shuffle_decks(void);
 void instantiate_card_modifiers(struct Card * cards);
 void shuffle(unsigned char (*array)[13]);
@@ -224,6 +230,7 @@ void _clock_counter(void)
     if (counter == 0)
     {
         second++;
+        update_reg |= SECONDS_UPDATED;
         second_forever++;
         counter = 20;
         if (second == SIXTY)

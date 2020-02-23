@@ -83,7 +83,8 @@ void reset_game(void)
 	second_forever = 0;
 	map_registers = NULL;
 	challenge = 0;
-	preferred = 1;
+	kicked_client = FALSE;
+	
 	shuffle_decks();
 }
 
@@ -123,30 +124,41 @@ void end_of_round(void) {
 	(*table_ptr)[2] = NULL;
 	(*table_ptr)[3] = NULL;
 	i = 0;
-	do {
-		i = rand8() % 4;
-		i = i == 4 ? BLACK_CARD : i;
-	} while (i == challenge);
-	challenge = i;
-	i = 0;
-	do {
-		i = rand8() % 4;
-		i = i == 4 ? BLACK_CARD : i;
-	} while (i == challenge);
-	preferred = i;
+
+	challenge = (challenge + 1) & 0x0f;
+	
+	// old alternative way without using arrays
+	// do {
+	// 	i = rand8() % 4;
+	// 	i = i == 4 ? BLACK_CARD : i;
+	// } while (i == challenge);
+	// challenge = i;
+	// i = 0;
+	// do {
+	// 	i = rand8() % 4;
+	// 	i = i == 4 ? BLACK_CARD : i;
+	// } while (i == challenge);
+	// preferred = i;
 
 	if (round == 0 || pp <= 0) {
 		GameState = ENDSCREEN;
+	} else {
+		update_reg = update_reg | SCORE_UPDATED | CLIENT_UPDATED;
 	}
 
 	if (cheat_num == CHEAT_RESET_ROUND) {
 		reset_game();
 		cheat_num = CHEAT_DISABLED;
 	}
-
-	// map_registers = NULL;
 }
 
+/* Count Points
+* This method looks for the total number of 
+* points the cards total to and return it
+*
+* It also take into consideration things like
+* prefered cards, required cards, bonus modifiers
+*/
 signed char count_points(void) {
 	sj = 0;
 	j = FALSE;
@@ -163,10 +175,10 @@ signed char count_points(void) {
 				sj += si;
 			}
 		}
-		if ((*table_ptr)[i]->color == challenge) {
+		if ((*table_ptr)[i]->color == challenge_table[challenge]) {
 			j = TRUE;
 		}
-		if ((*table_ptr)[i]->color == preferred) {
+		if ((*table_ptr)[i]->color == preferred_table[challenge]) {
 			sj += si;
 		}
 		
@@ -189,10 +201,7 @@ void shuffle_decks(void)
 	instantiate_card_modifiers(blue_cards);
 	instantiate_card_modifiers(green_cards);
 	instantiate_card_modifiers(yellow_cards);
-	i = rand8()&0x0f;
-	challenge = challenge_table[i];
-	preferred = preferred_table[i];
-
+	challenge = rand8()&0x0f;
 }
 
 void shuffle(unsigned char (*array)[13])
@@ -284,7 +293,6 @@ void interact_with_table()
 		} else {
 			play_sound(snd_ILLEGAL_ACTION);
 		}
-		// placed_on_table = placed_on_table << 1;
 	}
 }
 
@@ -384,6 +392,25 @@ void controller_game(void)
 	if (BTN(PAD_SELECT))
 	{
 		GameState = ENDSCREEN;
+	}
+	
+	if (BTN(PAD_START))
+	{
+		// kick client to end
+		if ((*table_ptr)[0] == NULL && 
+			(*table_ptr)[1]  == NULL && 
+			(*table_ptr)[2]  == NULL && 
+			(*table_ptr)[3]  == NULL && 
+			kicked_client == FALSE) 
+		{
+			if (cursor.card != NULL) 
+			{
+				cancel_card();
+			}
+			challenge++;
+			kicked_client = TRUE;
+			play_sound(snd_KICK_CLIENT);
+		}
 	}
 }
 
@@ -490,9 +517,9 @@ void print_table(void)
 	cursor_text[12] = ones;
 
 	
-	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(16, 8));
-	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(16, 10));
-	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(16, 12));
+	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(8, 8));
+	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(8, 9));
+	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(8, 10));
 	
 #endif
 	update_card_count();
@@ -521,79 +548,154 @@ void update_card_count(void)
 	convert_i_to_decimal();
 	cards_count[12] = tens;
 	cards_count[13] = ones;
-	multi_vram_buffer_horz(cards_count, sizeof(cards_count), NTADR_A(13, 28));
+	multi_vram_buffer_horz(cards_count, sizeof(cards_count), NTADR_A(9, 26));
 	
 }
 
 void update_score_header(void)
 {
-	i = pp;
-	convert_i_to_decimal();
-	
-	round_text[0] = thousands;
-	round_text[1] = tens;
-	round_text[2] = ones;
-	// round score
-	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 3));
-	
-	i = round_score;
-	convert_i_to_decimal();
-	
-	round_text[0] = thousands;
-	round_text[1] = tens;
-	round_text[2] = ones;
-	// total score
-	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 2));
-
-	w = second_forever;
-	convert_w_to_decimal();
-	
-	round_text[0] = thousands;
-	round_text[1] = tens;
-	round_text[2] = ones;
+	// last score
+	if (update_reg & SCORE_UPDATED) {
+		update_reg &= 0xfb;
+		i = pp;
+		convert_i_to_decimal();
+		round_text[0] = thousands;
+		round_text[1] = tens;
+		round_text[2] = ones;
+		multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 2));
+		
+		// round total score
+		i = round_score;
+		convert_i_to_decimal();
+		round_text[0] = thousands;
+		round_text[1] = tens;
+		round_text[2] = ones;
+		
+		multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(24, 1));
+	}
 	// seconds
-	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 2));
-	
-	i = 14 - round;
-	
-	convert_i_to_decimal();
-	
-	round_text[0] = thousands;
-	round_text[1] = tens;
-	round_text[2] = ones;
-	multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(13, 3));
+	if (update_reg & SECONDS_UPDATED) {
+		update_reg &=0xfe;
+		w = second_forever;
+		convert_w_to_decimal();
+		round_text[0] = thousands;
+		round_text[1] = tens;
+		round_text[2] = ones;
+		multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(9, 1));	
+	}
+	//clients
+	if (update_reg & CLIENT_UPDATED) {
+		update_reg &=0xfd;
+		i = 14 - round;
+		convert_i_to_decimal();
+		round_text[0] = thousands;
+		round_text[1] = tens;
+		round_text[2] = ones;
+		multi_vram_buffer_horz(round_text, sizeof(round_text), NTADR_A(11, 2));
+	}
 }
 
 void print_challenge()
 {
-	i = 22;
-	j = 50;
+	// challenge
+	i = 11;
+	j = 5;
 	
-	if (challenge == BLUE_CARD) {
-		oam_meta_spr(i, j, metasprite_blue);
-	} else if (challenge == YELLOW_CARD) {
-		oam_meta_spr(i, j, metasprite_yellow);
-	} else if (challenge == RED_CARD) {
-		oam_meta_spr(i, j, metasprite_red);
-	} else if (challenge == GREEN_CARD) {
-		oam_meta_spr(i, j, metasprite_green);
-	} else if (challenge == BLACK_CARD){
-		oam_meta_spr(i, j, metasprite_black);
+	if (challenge_table[challenge] == BLUE_CARD) {
+		multi_vram_buffer_horz(tile_blue_top, sizeof(tile_blue_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_blue_down, sizeof(tile_blue_down), NTADR_A(i, j+1));
+	} else if (challenge_table[challenge] == YELLOW_CARD) {
+		multi_vram_buffer_horz(tile_yellow_top, sizeof(tile_yellow_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_yellow_down, sizeof(tile_yellow_down), NTADR_A(i, j+1));
+	} else if (challenge_table[challenge] == RED_CARD) {
+		multi_vram_buffer_horz(tile_red_top, sizeof(tile_red_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_red_down, sizeof(tile_red_down), NTADR_A(i, j+1));
+	} else if (challenge_table[challenge] == GREEN_CARD) {
+		multi_vram_buffer_horz(tile_green_top, sizeof(tile_green_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_green_down, sizeof(tile_green_down), NTADR_A(i, j+1));
+	} else if (challenge_table[challenge] == BLACK_CARD){
+		multi_vram_buffer_horz(tile_black_top, sizeof(tile_black_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_black_down, sizeof(tile_black_down), NTADR_A(i, j+1));
+	}
+	// prefered
+	i = 17;
+	j = 5;
+	
+	if (preferred_table[challenge] == BLUE_CARD) {
+		multi_vram_buffer_horz(tile_blue_top, sizeof(tile_blue_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_blue_down, sizeof(tile_blue_down), NTADR_A(i, j+1));
+	} else if (preferred_table[challenge] == YELLOW_CARD) {
+		multi_vram_buffer_horz(tile_yellow_top, sizeof(tile_yellow_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_yellow_down, sizeof(tile_yellow_down), NTADR_A(i, j+1));
+	} else if (preferred_table[challenge] == RED_CARD) {
+		multi_vram_buffer_horz(tile_red_top, sizeof(tile_red_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_red_down, sizeof(tile_red_down), NTADR_A(i, j+1));
+	} else if (preferred_table[challenge] == GREEN_CARD) {
+		multi_vram_buffer_horz(tile_green_top, sizeof(tile_green_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_green_down, sizeof(tile_green_down), NTADR_A(i, j+1));
+	} else if (preferred_table[challenge] == BLACK_CARD){
+		multi_vram_buffer_horz(tile_black_top, sizeof(tile_black_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_black_down, sizeof(tile_black_down), NTADR_A(i, j+1));
+	}
+
+	// next
+	i = 5;
+	j = 5;
+	n = (challenge+1) & 0x0f;
+
+	if (challenge_table[n] == BLUE_CARD) {
+		multi_vram_buffer_horz(tile_blue_top, sizeof(tile_blue_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_blue_down, sizeof(tile_blue_down), NTADR_A(i, j+1));
+	} else if (challenge_table[n] == YELLOW_CARD) {
+		multi_vram_buffer_horz(tile_yellow_top, sizeof(tile_yellow_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_yellow_down, sizeof(tile_yellow_down), NTADR_A(i, j+1));
+	} else if (challenge_table[n] == RED_CARD) {
+		multi_vram_buffer_horz(tile_red_top, sizeof(tile_red_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_red_down, sizeof(tile_red_down), NTADR_A(i, j+1));
+	} else if (challenge_table[n] == GREEN_CARD) {
+		multi_vram_buffer_horz(tile_green_top, sizeof(tile_green_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_green_down, sizeof(tile_green_down), NTADR_A(i, j+1));
+	} else if (challenge_table[n] == BLACK_CARD){
+		multi_vram_buffer_horz(tile_black_top, sizeof(tile_black_top), NTADR_A(i, j));
+		multi_vram_buffer_horz(tile_black_down, sizeof(tile_black_down), NTADR_A(i, j+1));
 	}
 	
-	i = 86;
-	j = 50;
+	// print client distant from table
+	i = 8<<3;
+	j = 10<<3;
+	if (clients[n] == 0) {
+		oam_meta_spr(i, j, metasprite_client0);
+	}
+	if (clients[n] == 1) {
+		oam_meta_spr(i, j, metasprite_client1);
+	}
+	if (clients[n] == 2) {
+		oam_meta_spr(i, j, metasprite_client2);
+	}
+	if (clients[n] == 3) {
+		oam_meta_spr(i, j, metasprite_client3);
+	}
+	if (clients[n] == 4) {
+		oam_meta_spr(i, j, metasprite_client4);
+	}
 	
-	if (preferred == BLUE_CARD) {
-		oam_meta_spr(i, j, metasprite_blue);
-	} else if (preferred == YELLOW_CARD) {
-		oam_meta_spr(i, j, metasprite_yellow);
-	} else if (preferred == RED_CARD) {
-		oam_meta_spr(i, j, metasprite_red);
-	} else if (preferred == GREEN_CARD) {
-		oam_meta_spr(i, j, metasprite_green);
-	} else if (preferred == BLACK_CARD){
-		oam_meta_spr(i, j, metasprite_black);
+	// print client close to table
+	n = challenge;
+	i = 14<<3;
+	if (clients[n] == 0) {
+		oam_meta_spr(i, j, metasprite_client0);
+	}
+	if (clients[n] == 1) {
+		oam_meta_spr(i, j, metasprite_client1);
+	}
+	if (clients[n] == 2) {
+		oam_meta_spr(i, j, metasprite_client2);
+	}
+	if (clients[n] == 3) {
+		oam_meta_spr(i, j, metasprite_client3);
+	}
+	if (clients[n] == 4) {
+		oam_meta_spr(i, j, metasprite_client4);
 	}
 }
 
@@ -622,17 +724,16 @@ void print_temp_card_on_pos_x_y(void)
 	} else if (temp_card->color == BLACK_CARD){
 		oam_meta_spr((i+1)<<3, (j+2)<<3, metasprite_black);
 	}
-
 }
 
 void print_cursor(void)
 {
 	if (cursor.cell < 4) {
-		j = 21;
-		i = 11 + cursor.cell*4;
+		j = 19;
+		i = 7 + cursor.cell*4;
 	} else {
 		j = 13;
-		i = 11 + (cursor.cell - 4)*4;
+		i = 7 + (cursor.cell - 4)*4;
 	}
 	oam_meta_spr(i<<3, j<<3, metasprite_cursor_up);
 	oam_meta_spr(i<<3, (j+7)<<3, metasprite_cursor_down);
@@ -642,27 +743,27 @@ void update_cards_on_table(void)
 {
 	oam_clear();
 	// print card cost
-	i = 12, j=22;
+	i = 8, j=20;
 	temp_card = &blue_cards[BLUE_IDX];
 	print_temp_card_on_pos_x_y();
-	i = 16;
+	i = 12;
 	temp_card = &green_cards[GREEN_IDX];
 	print_temp_card_on_pos_x_y();
-	i = 20;
+	i = 16;
 	temp_card = &yellow_cards[YELLOW_IDX];
 	print_temp_card_on_pos_x_y();
-	i = 24;
+	i = 20;
 	temp_card = &red_cards[RED_IDX];
 	print_temp_card_on_pos_x_y();
 	
 	if (cursor.card != NULL)
 	{
-		i = 4, j = 18;
+		i = 24, j = 6;
 		temp_card = cursor.card;
 		print_temp_card_on_pos_x_y();
 	}
+	i = 8;
 	j = 14;
-	i = 12;
 	for (n = 0; n < 4; n++) {
 		if ((*table_ptr)[n] != NULL)
 		{
@@ -724,8 +825,8 @@ void load_room() {
 	switch (GameState)
 	{
 	case GAME:
-		set_data_pointer(room_game);
-		set_mt_pointer(room_game_mt);
+		set_data_pointer(room_bettergame);
+		set_mt_pointer(room_bettergame_mt);
 		map_registers = GAME_DRAWN;
 		break;
 	case ENDSCREEN:
@@ -762,11 +863,11 @@ void load_room() {
 	// Paint the cards each with a different collor
 	if (map_registers == GAME_DRAWN) {
 		n = 0;
-		for (i = 12; i < 25; i+=4) {
-			address = get_at_addr(0, i<<3, 22<<3);
+		for (i = 8; i < 8+13; i+=4) {
+			address = get_at_addr(0, i<<3, 20<<3);
 			vram_adr(address); // pick a random attribute byte on the lower half
 			vram_put(card_palete[n]);
-			address = get_at_addr(0, i<<3, 26<<3);
+			address = get_at_addr(0, i<<3, 24<<3);
 			vram_adr(address); // pick a random attribute byte on the lower half
 			vram_put(card_palete[n]);
 			n++;
@@ -793,7 +894,7 @@ void timer_draw(void)
 	datetime[1] = ones;
 	datetime[0] = tens;
 
-	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(10,1));
+	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(9,0));
 }
 
 void sleep(BYTE byte)
