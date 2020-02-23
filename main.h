@@ -166,7 +166,7 @@ struct Card red_cards[] = {
 struct Card * temp_card;
 
 const unsigned char palette_bg[] = {
-    0x0f, 0x28, 0x17, 0x3c,
+    0x0f, 0x28, 0x17, 0x10,
     0x0f, 0x1c, 0x28, 0x39,
     0x0f, 0x05, 0x15, 0x26,
     0x0f, 0x09, 0x1a, 0x2a};
@@ -197,6 +197,7 @@ void print_scores(void);
 void print_temp_card_on_pos_x_y(void);
 void print_cursor(void);
 void print_challenge(void);
+void print_clients(void);
 
 void update_card_count(void);
 void update_score_header(void);
