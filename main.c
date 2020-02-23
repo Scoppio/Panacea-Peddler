@@ -284,12 +284,14 @@ void interact_with_table()
 				}
 				break;
 		}
+		update_reg |= CARD_ON_TABLE_UPDATED;
 	} else {
 		// place card on table
 		if (cursor.cell - 4 >= 0 && cursor.cell -4 < 4 && (*table_ptr)[cursor.cell-4] == NULL) {
 			(*table_ptr)[cursor.cell-4] = cursor.card;
 			cursor.card = NULL;
 			placed_on_table = cursor.card->id;
+			update_reg |= CARD_ON_TABLE_UPDATED;
 		} else {
 			play_sound(snd_ILLEGAL_ACTION);
 		}
@@ -308,6 +310,7 @@ void cancel_card()
 	i = (cursor.card->id >> 4);
 	cards_size_ptr[i]--;
 	cursor.card = NULL;
+	update_reg |= CARD_ON_TABLE_UPDATED;
 }
 
 void controller(void) {
@@ -532,24 +535,26 @@ void print_table(void)
 
 void update_card_count(void)
 {
-	i = 13-blue_size_pt;
-	convert_i_to_decimal();
-	cards_count[0] = tens;
-	cards_count[1] = ones;
-	i = 13-green_size_pt;
-	convert_i_to_decimal();
-	cards_count[4] = tens;
-	cards_count[5] = ones;
-	i = 13-yellow_size_pt;
-	convert_i_to_decimal();
-	cards_count[8] = tens;
-	cards_count[9] = ones;
-	i = 13-red_size_pt;
-	convert_i_to_decimal();
-	cards_count[12] = tens;
-	cards_count[13] = ones;
-	multi_vram_buffer_horz(cards_count, sizeof(cards_count), NTADR_A(9, 26));
-	
+	if (update_reg & CARD_ON_TABLE_UPDATED) {
+		i = 13-blue_size_pt;
+		convert_i_to_decimal();
+		cards_count[0] = tens;
+		cards_count[1] = ones;
+		i = 13-green_size_pt;
+		convert_i_to_decimal();
+		cards_count[4] = tens;
+		cards_count[5] = ones;
+		i = 13-yellow_size_pt;
+		convert_i_to_decimal();
+		cards_count[8] = tens;
+		cards_count[9] = ones;
+		i = 13-red_size_pt;
+		convert_i_to_decimal();
+		cards_count[12] = tens;
+		cards_count[13] = ones;
+		multi_vram_buffer_horz(cards_count, sizeof(cards_count), NTADR_A(9, 26));
+		// TODO paint the back of the card that will be placed on the table
+	}
 }
 
 void update_score_header(void)
