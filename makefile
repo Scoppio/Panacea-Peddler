@@ -10,8 +10,8 @@ CA = ca65
 # Link object files in a single final file
 LD = ld65
 
-CC65FLAGS = --add-source --all-cdecl --eagerly-inline-funcs --inline-stdfuncs --check-stack -t nes
-CFLAGS = -g 
+CC65FLAGS = --add-source --all-cdecl --eagerly-inline-funcs --inline-stdfuncs --check-stack -t nes --standard cc65
+CFLAGS = -g --cpu 6502X
 LDFLAGS = -C nrom_32k_vert.cfg
 BUILD_FILES = nes.lib -Ln
 
@@ -35,15 +35,8 @@ endif
 
 # process that creates the output folder if not present
 
-ifeq (,$(wildcard $(@D)))
-    	dir_guard=
-else
-		dir_guard=$(MKDIR_P) $(@D)	
-endif
-
 # Build process - c to asm files
 $(ODIR)/%.s: %.c
-	$(dir_guard)
 	$(CC) -o $@ -Oirs $^ $(CC65FLAGS)
 
 # Generated Asm file to object file

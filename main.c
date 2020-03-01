@@ -2,6 +2,10 @@
  *  @author scoppio
  *  @date 2019-2020
  */
+// #define DEBUG
+// #define UNITTEST
+
+
 #include "lib/neslib.h"
 #include "lib/nesdoug.h"
 #include "lib/colornames.h"
@@ -11,14 +15,20 @@
 #include "assets/maps/gamescene.h"
 #include "assets/maps/gamecards.h"
 
+#ifndef MAIN
+#define MAIN
 #include "main.h"
+#endif
+
 #include "cheats.h"
 
+#ifdef UNITTEST
+#include "unittest.h"
+#endif
 // there's some oddities in the palette code, black must be 0x0f, white must be 0x30
 
 #pragma bss - name(push, "ZEROPAGE")
 
-// #define DEBUG
 
 // Game states
 #define MENU 0
@@ -917,7 +927,11 @@ void sleep(BYTE byte)
 void main(void)
 {
 	_init();
+#ifdef UNITTEST
+	run_tests();
+#else
 	_game_loop();
+#endif
 }
 
 void _game_loop(void)

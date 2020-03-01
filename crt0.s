@@ -248,6 +248,7 @@ detectNTSC:
 
 	.include "lib/neslib.s"
 	.include "lib/nesdoug.s"
+	.include "lib/unittestcodes.s"
 	.include "assets/music/famitone2.s"
 	
 	
