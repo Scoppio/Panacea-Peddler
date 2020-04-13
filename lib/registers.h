@@ -18,10 +18,7 @@ signed char sj = 0;
 signed char sn = 0;
 
 static const unsigned char ZERO_CHAR = '0';
-
-#ifdef DEBUG
 static const unsigned char HIFEN_CHAR = '-';
-#endif
 
 void convert_i_to_decimal(void)
 {

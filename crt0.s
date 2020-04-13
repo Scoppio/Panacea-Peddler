@@ -1,4 +1,4 @@
-; Startup code for cc65 and Shiru's NES library
+;Startup code for cc65 and Shiru's NES library
 
 FT_BASE_ADR		= $0100		;page in RAM, should be $xx00
 FT_DPCM_OFF		= $f000		;$c000..$ffc0, 64-byte steps
@@ -248,7 +248,9 @@ detectNTSC:
 
 	.include "lib/neslib.s"
 	.include "lib/nesdoug.s"
+.if .defined(UNITTEST)
 	.include "lib/unittestcodes.s"
+.endif
 	.include "assets/music/famitone2.s"
 	
 	

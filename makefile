@@ -53,7 +53,7 @@ $(ODIR)/%.o: $(ODIR)/%.s
 game.nes: $(DEPS)
 	$(LD) $(LDFLAGS) -o $(ODIR)/$@ $^ $(BUILD_FILES) $(LABELS) $(EXTRAS)
 	python scripts/fceux_symbols.py $(ODIR)/game.labels.txt 
-
+	
 .PHONY: maps
 
 # Build process - tmx to h files

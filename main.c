@@ -48,6 +48,7 @@ unsigned char GameState = MENU;
 #define green_size_pt cards_size_ptr[1]
 #define yellow_size_pt cards_size_ptr[2]
 #define red_size_pt cards_size_ptr[3]
+#define __CARD(x) (*table_ptr)[x]
 
 #define BTN(btn) (pad1_new & btn)
 #define HEX_TO_CHAR(byt) (((byt & 0x0F) > 0x9) ? (byt & 0x0F) + SEVEN_CHAR : (byt & 0x0F) + ZERO_CHAR)
@@ -169,31 +170,68 @@ void end_of_round(void) {
 * It also take into consideration things like
 * prefered cards, required cards, bonus modifiers
 */
+
+
 signed char count_points(void) {
 	sj = 0;
+	si = 0;
 	j = FALSE;
-	for (i=0; i<4; i++) {
-		si = 0;
-		si += (*table_ptr)[i]->value;
-		if (i > 0) {
-			if ((*table_ptr)[i]->Lmodifier == (*table_ptr)[i-1]->color) {
-				sj += si;
-			}
-		}
-		if (i < 3) {
-			if ((*table_ptr)[i]->Rmodifier == (*table_ptr)[i+1]->color) {
-				sj += si;
-			}
-		}
-		if ((*table_ptr)[i]->color == challenge_table[challenge]) {
-			j = TRUE;
-		}
-		if ((*table_ptr)[i]->color == preferred_table[challenge]) {
-			sj += si;
-		}
-		
-		sj += si;
+	// leftmost card
+	si = __CARD(0)->value;
+	if (__CARD(0)->Rmodifier == __CARD(1)->color) {
+		si += __CARD(0)->value;
 	}
+	if (__CARD(0)->color == preferred_table[challenge]) {
+		si += si;
+	}
+	sj += si;
+	if (__CARD(0)->color == challenge_table[challenge]) {
+		j = TRUE;
+	}
+
+	si = __CARD(1)->value;
+	if (__CARD(1)->Lmodifier == __CARD(0)->color) {
+		si += __CARD(1)->value;
+	}
+	if (__CARD(1)->Rmodifier == __CARD(2)->color) {
+		si += __CARD(1)->value;
+	}
+	if (__CARD(1)->color == preferred_table[challenge]) {
+		si += si;
+	}
+	sj += si;
+	if (__CARD(1)->color == challenge_table[challenge]) {
+		j = TRUE;
+	}
+
+	si = __CARD(2)->value;
+	if (__CARD(2)->Lmodifier == __CARD(1)->color) {
+		si += __CARD(2)->value;
+	}
+	if (__CARD(2)->Rmodifier == __CARD(3)->color) {
+		si += __CARD(2)->value;
+	}
+	if (__CARD(2)->color == preferred_table[challenge]) {
+		si += si;
+	}
+	sj += si;
+	if (__CARD(2)->color == challenge_table[challenge]) {
+		j = TRUE;
+	}
+
+	si = __CARD(3)->value;
+	if (__CARD(3)->Lmodifier == __CARD(2)->color) {
+		si += __CARD(3)->value;
+	}
+	if (__CARD(3)->color == preferred_table[challenge]) {
+		si += si;
+	}
+	sj += si;
+	if (__CARD(3)->color == challenge_table[challenge]) {
+		j = TRUE;
+	}
+	
+
 	if (j == FALSE) {
 		sj = 0;
 	}
@@ -452,10 +490,6 @@ void controller_menu(void)
 void _draw(void)
 {
 	clear_vram_buffer();
-#ifdef DEBUG
-	timer_draw();
-#endif
-
 	switch (GameState) {
 		case MENU:
 			print_entry();
@@ -486,6 +520,17 @@ void print_table(void)
 		load_room();
 	}
 #ifdef DEBUG
+	print_debug_game_drawn()
+#endif
+	update_card_count();
+	update_score_header();
+	ppu_wait_nmi();
+
+	update_cards_on_table();
+	ppu_wait_nmi();
+}
+
+void print_debug_game_drawn(void) {
 	for (j = 0; j < 8; j++) 
 	{
 		if (j > 3) 
@@ -533,14 +578,6 @@ void print_table(void)
 	multi_vram_buffer_horz(table_debug_text, sizeof(table_debug_text), NTADR_A(8, 8));
 	multi_vram_buffer_horz(deck_debug_text, sizeof(deck_debug_text), NTADR_A(8, 9));
 	multi_vram_buffer_horz(cursor_text, sizeof(cursor_text), NTADR_A(8, 10));
-	
-#endif
-	update_card_count();
-	update_score_header();
-	ppu_wait_nmi();
-
-	update_cards_on_table();
-	ppu_wait_nmi();
 }
 
 void update_card_count(void)
@@ -892,24 +929,6 @@ void load_room() {
 	
 	clear_vram_buffer(); 
 	ppu_on_all();
-}
-
-void timer_draw(void)
-{
-	i = second;
-	convert_i_to_decimal();
-	datetime[7] = ones;
-	datetime[6] = tens;
-	i = minute;
-	convert_i_to_decimal();
-	datetime[4] = ones;
-	datetime[3] = tens;
-	i = hour;
-	convert_i_to_decimal();
-	datetime[1] = ones;
-	datetime[0] = tens;
-
-	multi_vram_buffer_horz(datetime, sizeof(datetime), NTADR_A(9,0));
 }
 
 void sleep(BYTE byte)

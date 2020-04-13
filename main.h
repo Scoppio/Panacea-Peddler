@@ -198,6 +198,7 @@ void print_temp_card_on_pos_x_y(void);
 void print_cursor(void);
 void print_challenge(void);
 void print_clients(void);
+void print_debug_game_drawn(void);
 
 void update_card_count(void);
 void update_score_header(void);
